@@ -45,14 +45,14 @@ private:
 	void RunCore1 (void);
 	void RunCore2 (void);
 	void RunCore3 (void);
-	void SyncMaster(CSpinLock&, unsigned);
-	void SyncSlave(CSpinLock&, unsigned, unsigned);
+	void SyncMaster(CSpinLock&);
+	void SyncSlave(CSpinLock&, unsigned);
 
 private:
 	CScreenDevice *m_pScreen;
 	CSpinLock m_SpinLock;
-	CSpinLock m_SyncLock[2];
-	unsigned m_CoreWaiting[2][4];
+	CSpinLock m_SyncLock;
+	unsigned m_CoreWaiting;
 	volatile bigstruct_t* m_data1;
 	volatile bigstruct_t* m_data2;
 	volatile bigstruct_t* m_data3;

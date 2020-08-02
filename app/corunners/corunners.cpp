@@ -30,28 +30,23 @@
 #include <circle/types.h>
 #include "randomwrapper.h"
 
-extern "C" int write_atomic(unsigned, unsigned*);
-
-static inline unsigned read_atomic(unsigned* ptr);
+// These are methods that are implemented in assembly
+// See ldstexcl.S
+extern "C" {
+	int write_bit_atomic(unsigned, boolean, unsigned*);
+	boolean read_bit_atomic(unsigned, unsigned*);
+	unsigned read_atomic(unsigned* ptr);
+	volatile void countdown(u64);
+}
 
 static const char FromCoRunners[] = "CoRunners";
-
-static inline unsigned read_atomic(unsigned* ptr)
-{
-	unsigned val;
-	asm volatile(
-		"ldxr %x[val], [%[addr]]"
-		: [val]"=r" (val)
-		: [addr]"r" (ptr));
-	asm volatile("dmb ish");
-	return val;
-}
 
 CoRunners::CoRunners (CScreenDevice *pScreen, CMemorySystem *pMemorySystem)
 :
 	CMultiCoreSupport (pMemorySystem),
 	m_pScreen (pScreen)
 {
+	m_CoreWaiting = 0;
 }
 
 CoRunners::~CoRunners (void)
@@ -63,81 +58,58 @@ CoRunners::~CoRunners (void)
 	free((void*) m_data4);
 }
 
-void CoRunners::SyncMaster(CSpinLock& lock, unsigned nr)
+void CoRunners::SyncMaster(CSpinLock& lock)
 {
-	// CLogger::Get()->Write(FromCoRunners, LogNotice,
-	// 					  "Master aquiring lock");
-
 	lock.Acquire();
 
 	// Set the flag for master, to indicate to the slaves that
 	// we have set acquired the lock and will wait for the slaves
 	// to start waiting
-	if (!write_atomic(1, &m_CoreWaiting[nr][0]))
-		CLogger::Get()->Write(FromCoRunners, LogNotice,
+	if (write_bit_atomic(0, true, &m_CoreWaiting))
+		CLogger::Get()->Write(FromCoRunners, LogWarning,
 							  "Core0: failure to write to memory");
 
 	boolean exit = false;
 	while (!exit) {
 		exit = true;
-		exit = exit && read_atomic(&m_CoreWaiting[nr][1]);
-		exit = exit && read_atomic(&m_CoreWaiting[nr][2]);
-		exit = exit && read_atomic(&m_CoreWaiting[nr][3]);
+		exit = exit && read_bit_atomic(1, &m_CoreWaiting);
+		exit = exit && read_bit_atomic(2, &m_CoreWaiting);
+		exit = exit && read_bit_atomic(3, &m_CoreWaiting);
 	}
 
-	for (int i=0; i<4; i++)
-		if (!write_atomic(0, &m_CoreWaiting[nr][i]))
-			CLogger::Get()->Write(FromCoRunners, LogNotice,
+	for (int i=1; i<4; i++)
+		if (write_bit_atomic(i, false, &m_CoreWaiting))
+			CLogger::Get()->Write(FromCoRunners, LogWarning,
 								  "Core0: failure to write to memory");
 
 	lock.Release();
+
+	// Reset waiting status for master
+	if (write_bit_atomic(4, false, &m_CoreWaiting))
+		CLogger::Get()->Write(FromCoRunners, LogWarning,
+							  "Core0: failure to write to memory");
 }
 
-void CoRunners::SyncSlave(CSpinLock& lock, unsigned nr, unsigned corenum)
+void CoRunners::SyncSlave(CSpinLock& lock, unsigned corenum)
 {
-	if (!write_atomic(1, &m_CoreWaiting[nr][corenum]))
-		CLogger::Get()->Write(FromCoRunners, LogNotice,
+	if (write_bit_atomic(corenum, true, &m_CoreWaiting))
+		CLogger::Get()->Write(FromCoRunners, LogWarning,
 							  "Core%d: failure to write to memory", corenum);
 
 	// First make sure that master has acquired the lock and is
 	// already waiting
-	while (!read_atomic(&m_CoreWaiting[nr][0]))
+	while (!read_bit_atomic(0, &m_CoreWaiting))
 		;
 
 	lock.Acquire();
 	lock.Release();
+
+	// Maybe wait a while (create time offset in starting time co-runner)
+	countdown(1000000000);
 }
 
 void CoRunners::Run (unsigned corenum)
 {
-	if (corenum == 0) {
-		for (int i=0; i<4; i++) {
-			if (!write_atomic(0, &m_CoreWaiting[0][i]))
-				CLogger::Get()->Write(FromCoRunners, LogNotice,
-									  "Failure to write to memory!");
-			if (!write_atomic(0, &m_CoreWaiting[1][i]))
-				CLogger::Get()->Write(FromCoRunners, LogNotice,
-									  "Failure to write to memory!");
-		}
-	}
-
-	// // Test the read exclusive code
-	// int local = 0x000000010000002A + corenum;
-	// int res = write_atomic(local, &test_member);
-	// if (res == 0) {
-	// 	CLogger::Get()->Write(FromCoRunners, LogNotice,
-	// 						  "Core %d wrote %d to memory", corenum, local);
-	// } else {
-	// 	CLogger::Get()->Write(FromCoRunners, LogNotice,
-	// 						  "Core %d store exclusive was unsuccessful(%d)",
-	// 						  corenum, res);
-	// }
-
-	// test_member = read_atomic(&test_member);
-
-	// CLogger::Get()->Write(FromCoRunners, LogNotice,
-	// 					  "Core %d read back %d from memory", corenum, test_member);
-
 	switch (corenum) {
 	case 0:
 		RunCore0();
@@ -163,7 +135,7 @@ void CoRunners::RunCore0()
     u64 cycles;
 	unsigned corenum = 0;
 
-	CLogger::Get ()->Write(FromCoRunners, LogNotice,
+	CLogger::Get ()->Write(FromCoRunners, LogDebug,
 						   "Core %d is requesting memory.", corenum);
 	m_SpinLock.Acquire ();
 	Array1 = (volatile int*) malloc(NUMELEMS * sizeof(int));
@@ -173,15 +145,16 @@ void CoRunners::RunCore0()
 							  "Core %d Array1 pointer is NULL!",
 							  corenum);
 	else
-		CLogger::Get()->Write(FromCoRunners, LogNotice,
+		CLogger::Get()->Write(FromCoRunners, LogDebug,
 							  "Core %d Array1 pointer is not NULL.",
 							  corenum);
 
 	/* Globally enable PMU */
 	enable_pmu();
 
+	unsigned iter=0;
 	while (1) {
-		SyncMaster(m_SyncLock[0], 0);
+		SyncMaster(m_SyncLock);
 
 		bsort100_Initialize(Array1, &rand);
 		enable_cycle_counter();
@@ -191,13 +164,11 @@ void CoRunners::RunCore0()
 		cycles = read_cycle_counter();
 
 		CLogger::Get ()->Write(FromCoRunners, LogNotice,
-							   "Core%d: %lu cycles spent",
-							   corenum, cycles);
+							   "Core%d: %lu cycles spent, iteration = %d",
+							   corenum, cycles, ++iter);
 
 		// let the temperature task run (only for core 0)
 		CScheduler::Get ()->Yield ();
-
-		SyncMaster(m_SyncLock[1], 1);
 	}
 }
 
@@ -205,7 +176,7 @@ void CoRunners::RunCore1()
 {
     u64 cycles;
 	unsigned corenum = 1;
-	CLogger::Get ()->Write(FromCoRunners, LogNotice,
+	CLogger::Get ()->Write(FromCoRunners, LogDebug,
 						   "Core %d is requesting memory.", corenum);
 	m_SpinLock.Acquire ();
 	m_data2 = new bigstruct_t[SYNBENCH_DATASIZE];
@@ -215,15 +186,16 @@ void CoRunners::RunCore1()
 							  "Core %d m_data2 pointer is NULL!",
 							  corenum);
 	else
-		CLogger::Get()->Write(FromCoRunners, LogNotice,
+		CLogger::Get()->Write(FromCoRunners, LogDebug,
 							  "Core %d m_data2 pointer is not NULL.",
 							  corenum);
 
 	/* Globally enable PMU */
 	enable_pmu();
 
+	unsigned iter=0;
 	while (1) {
-		SyncSlave(m_SyncLock[0], 0, corenum);
+		SyncSlave(m_SyncLock, corenum);
 
 		enable_cycle_counter();
 		reset_cycle_counter();
@@ -232,10 +204,8 @@ void CoRunners::RunCore1()
 		cycles = read_cycle_counter();
 
 		CLogger::Get ()->Write(FromCoRunners, LogNotice,
-							   "Core%d: %lu cycles spent",
-							   corenum, cycles);
-
-		SyncSlave(m_SyncLock[1], 1, corenum);
+							   "Core%d: %lu cycles spent, iteration = %d",
+							   corenum, cycles, ++iter);
 	}
 }
 
@@ -243,7 +213,7 @@ void CoRunners::RunCore2()
 {
     u64 cycles;
 	unsigned corenum = 2;
-	CLogger::Get ()->Write(FromCoRunners, LogNotice,
+	CLogger::Get ()->Write(FromCoRunners, LogDebug,
 						   "Core %d is requesting memory.", corenum);
 	m_SpinLock.Acquire ();
 	m_data3 = new bigstruct_t[SYNBENCH_DATASIZE];
@@ -253,15 +223,16 @@ void CoRunners::RunCore2()
 							  "Core %d m_data3 pointer is NULL!",
 							  corenum);
 	else
-		CLogger::Get()->Write(FromCoRunners, LogNotice,
+		CLogger::Get()->Write(FromCoRunners, LogDebug,
 							  "Core %d m_data3 pointer is not NULL.",
 							  corenum);
 
 	/* Globally enable PMU */
 	enable_pmu();
 
+	unsigned iter=0;
 	while (1) {
-		SyncSlave(m_SyncLock[0], 0, corenum);
+		SyncSlave(m_SyncLock, corenum);
 
 		enable_cycle_counter();
 		reset_cycle_counter();
@@ -270,10 +241,8 @@ void CoRunners::RunCore2()
 		cycles = read_cycle_counter();
 
 		CLogger::Get ()->Write(FromCoRunners, LogNotice,
-							   "Core%d: %lu cycles spent",
-							   corenum, cycles);
-
-		SyncSlave(m_SyncLock[1], 1, corenum);
+							   "Core%d: %lu cycles spent, iteration = %d",
+							   corenum, cycles, ++iter);
 	}
 }
 
@@ -281,7 +250,7 @@ void CoRunners::RunCore3()
 {
     u64 cycles;
 	unsigned corenum = 3;
-	CLogger::Get ()->Write(FromCoRunners, LogNotice,
+	CLogger::Get ()->Write(FromCoRunners, LogDebug,
 						   "Core %d is requesting memory.", corenum);
 	m_SpinLock.Acquire ();
 	m_data4 = new bigstruct_t[SYNBENCH_DATASIZE];
@@ -291,15 +260,16 @@ void CoRunners::RunCore3()
 							  "Core %d m_data4 pointer is NULL!",
 							  corenum);
 	else
-		CLogger::Get()->Write(FromCoRunners, LogNotice,
+		CLogger::Get()->Write(FromCoRunners, LogDebug,
 							  "Core %d m_data4 pointer is not NULL.",
 							  corenum);
 
 	/* Globally enable PMU */
 	enable_pmu();
 
+	unsigned iter=0;
 	while (1) {
-		SyncSlave(m_SyncLock[0], 0, corenum);
+		SyncSlave(m_SyncLock, corenum);
 
 		enable_cycle_counter();
 		reset_cycle_counter();
@@ -308,9 +278,7 @@ void CoRunners::RunCore3()
 		cycles = read_cycle_counter();
 
 		CLogger::Get ()->Write(FromCoRunners, LogNotice,
-							   "Core%d: %lu cycles spent",
-							   corenum, cycles);
-
-		SyncSlave(m_SyncLock[1], 1, corenum);
+							   "Core%d: %lu cycles spent, iteration = %d",
+							   corenum, cycles, ++iter);
 	}
 }
