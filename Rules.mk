@@ -105,7 +105,8 @@ ifeq ($(strip $(STDLIB_SUPPORT)),0)
 CFLAGS	  += -nostdinc
 else
 LIBGCC	  != $(CPP) $(ARCH) -print-file-name=libgcc.a
-EXTRALIBS += $(LIBGCC)
+LIBC	  != $(CPP) $(ARCH) -print-file-name=libc.a
+EXTRALIBS += $(LIBGCC) $(LIBC)
 endif
 
 ifeq ($(strip $(STDLIB_SUPPORT)),1)
