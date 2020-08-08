@@ -23,14 +23,19 @@
 #ifndef _corunners_h
 #define _corunners_h
 
+#include "corunners_definition.h"
+
 #include <circle/multicore.h>
 #include <circle/screen.h>
 #include <circle/memory.h>
 #include <circle/types.h>
+#include <circle/logger.h>
+
 extern "C" {
 	#include "armv8_pm.h"
 	#include "synthetic_bench.h"
 	#include "malardalen.h"
+	#include "sdvbs/disparity/disparity.h"
 }
 
 class CoRunners : public CMultiCoreSupport
@@ -50,6 +55,7 @@ private:
 
 private:
 	CScreenDevice *m_pScreen;
+	CLogger* m_log;
 	CSpinLock m_SpinLock;
 	CSpinLock m_SyncLock;
 	unsigned m_CoreWaiting;
@@ -57,10 +63,14 @@ private:
 	volatile bigstruct_t* m_data2;
 	volatile bigstruct_t* m_data3;
 	volatile bigstruct_t* m_data4;
+	volatile int* m_randidx1;
+	volatile int* m_randidx2;
+	volatile int* m_randidx3;
+	volatile int* m_randidx4;
 	volatile int* Array1;
 	volatile int* Array2;
 	volatile int* Array3;
 	volatile int* Array4;
 };
 
-#endif
+#endif // _corunners_h

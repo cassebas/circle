@@ -3,17 +3,16 @@
 
 Slightly modified for our use case.
 */
-/* #include "xRTOS.h" */
+#ifndef MALARDALEN_H
+#define MALARDALEN_H
+
+#include "randomwrapper.h"
 
 /*
  * bsort100: Malardalen's Bubblesort definitions.
  */
-
-
-#include "randomwrapper.h"
-
 #define WORSTCASE 1
-#define NUMELEMS 2000
+#define NUMELEMS 100
 #define MAXDIM   (NUMELEMS+1)
 
 void bsort100_Initialize(volatile int Array[], RandomWrapper*);
@@ -47,3 +46,5 @@ void matmult_Multiply(matrix A, matrix B, matrix Res);
 void matmult_InitSeed(void);
 void matmult_Initialize(matrix Array);
 int matmult_RandomInteger(void);
+
+#endif /* MALARDALEN_H */

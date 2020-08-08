@@ -7,6 +7,8 @@
 #ifndef SYNTHETIC_BENCH_H
 #define SYNTHETIC_BENCH_H
 
+#include "randomwrapper.h"
+
 /**
  * We want to use a data structure that consists of more than
  * 512KB (size of L2 cache). We'll use 10,240 arrays of 64 bytes
@@ -49,7 +51,7 @@ typedef struct bigstruct {
 
 int array_access_linear(volatile bigstruct_t* data);
 void array_write_linear(volatile bigstruct_t* data);
-void array_access_randomize(volatile int* idx, int corenum);
+void array_access_randomize(volatile int* idx, RandomWrapper* rand);
 int array_access_random(volatile bigstruct_t* data, volatile int* idx);
 void array_write_random(volatile bigstruct_t* data, volatile int* idx);
 void array_access_alternate(volatile bigstruct_t* data);

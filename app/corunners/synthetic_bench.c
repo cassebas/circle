@@ -29,11 +29,10 @@ void array_write_linear(volatile bigstruct_t* data)
 	}
 }
 
-void array_access_randomize(volatile int* idx, int corenum)
+void array_access_randomize(volatile int* idx, RandomWrapper* rand)
 {
-	int nNumber = 50;
 	for (int i=0; i<SYNBENCH_DATASIZE; i++) {
-		idx[i] = nNumber % SYNBENCH_DATASIZE;
+		idx[i] = get_number(rand) % SYNBENCH_DATASIZE;
 	}
 }
 
