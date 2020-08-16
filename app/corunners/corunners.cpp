@@ -193,6 +193,13 @@ void CoRunners::RunCore0()
 			srcImage2->data[i] = rand.GetNumber() % 256;
 		}
 #endif
+
+#ifndef DISABLE_CACHE
+	#ifndef NO_CACHE_MGMT
+		/* Master gets to invalidate the complete cache */
+		InvalidateDataCache ();
+		CleanDataCache ();
+	#endif
 #endif
 
 		SyncMaster(m_SyncLock);
@@ -257,6 +264,14 @@ void CoRunners::RunCore1()
 			srcImage2->data[i] = rand.GetNumber() % 256;
 		}
 #endif
+
+#ifndef DISABLE_CACHE
+	#ifndef NO_CACHE_MGMT
+		/* Slave only invalidates its own L1 cache */
+		InvalidateDataCacheL1Only();
+	#endif
+#endif
+
 		SyncSlave(m_SyncLock, corenum);
 
 		enable_cycle_counter();
@@ -316,6 +331,14 @@ void CoRunners::RunCore2()
 			srcImage2->data[i] = rand.GetNumber() % 256;
 		}
 #endif
+
+#ifndef DISABLE_CACHE
+	#ifndef NO_CACHE_MGMT
+		/* Slave only invalidates its own L1 cache */
+		InvalidateDataCacheL1Only();
+	#endif
+#endif
+
 		SyncSlave(m_SyncLock, corenum);
 
 		enable_cycle_counter();
@@ -375,6 +398,14 @@ void CoRunners::RunCore3()
 			srcImage2->data[i] = rand.GetNumber() % 256;
 		}
 #endif
+
+#ifndef DISABLE_CACHE
+	#ifndef NO_CACHE_MGMT
+		/* Slave only invalidates its own L1 cache */
+		InvalidateDataCacheL1Only();
+	#endif
+#endif
+
 		SyncSlave(m_SyncLock, corenum);
 
 		enable_cycle_counter();
