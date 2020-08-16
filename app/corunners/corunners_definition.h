@@ -50,7 +50,7 @@
 
 #define DO_BENCH_CORE0 getDisparity(srcImage1, srcImage2, WIN_SZ, SHIFT);
 #define DO_BENCH_CORE1 edn_Calculate();
-#define DO_BENCH_CORE2 array_write_random(BENCH_ARG_CORE2);
+#define DO_BENCH_CORE2 array_write_linear(BENCH_ARG_CORE2);
 #define DO_BENCH_CORE3
 
 #define EXP_LABEL "DEFAULT"
