@@ -56,17 +56,16 @@ private:
 private:
 	CScreenDevice *m_pScreen;
 	CLogger* m_log;
-	CSpinLock m_SpinLock;
 	CSpinLock m_SyncLock;
 	unsigned m_CoreWaiting;
-	volatile bigstruct_t* m_data1;
-	volatile bigstruct_t* m_data2;
-	volatile bigstruct_t* m_data3;
-	volatile bigstruct_t* m_data4;
-	volatile int* m_randidx1;
-	volatile int* m_randidx2;
-	volatile int* m_randidx3;
-	volatile int* m_randidx4;
+	volatile bigstruct_t* mydata1;
+	volatile bigstruct_t* mydata2;
+	volatile bigstruct_t* mydata3;
+	volatile bigstruct_t* mydata4;
+	volatile int* myrandidx1;
+	volatile int* myrandidx2;
+	volatile int* myrandidx3;
+	volatile int* myrandidx4;
 	volatile int* Array1;
 	volatile int* Array2;
 	volatile int* Array3;

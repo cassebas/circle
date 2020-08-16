@@ -71,12 +71,12 @@ CoRunners::~CoRunners (void)
 {
 	m_pScreen = 0;
 	free((void*) Array1);
-	free((void*) m_data2);
-	free((void*) m_data3);
-	free((void*) m_data4);
-	free((void*) m_randidx2);
-	free((void*) m_randidx3);
-	free((void*) m_randidx4);
+	free((void*) mydata2);
+	free((void*) mydata3);
+	free((void*) mydata4);
+	free((void*) myrandidx2);
+	free((void*) myrandidx3);
+	free((void*) myrandidx4);
 }
 
 void CoRunners::SyncMaster(CSpinLock& lock)
@@ -103,12 +103,12 @@ void CoRunners::SyncMaster(CSpinLock& lock)
 			m_log->Write(FromCoRunners, LogWarning,
 						 "Core0: failure to write to memory");
 
-	lock.Release();
-
 	// Reset waiting status for master
 	if (write_bit_atomic(4, false, &m_CoreWaiting))
 		m_log->Write(FromCoRunners, LogWarning,
 					 "Core0: failure to write to memory");
+
+	lock.Release();
 }
 
 void CoRunners::SyncSlave(CSpinLock& lock, unsigned corenum)
@@ -125,7 +125,7 @@ void CoRunners::SyncSlave(CSpinLock& lock, unsigned corenum)
 	lock.Acquire();
 	lock.Release();
 
-	// Maybe wait a while (create time offset in starting time co-runner)
+	// // Maybe wait a while (create time offset in starting time co-runner)
 	// countdown(1000000000);
 }
 
@@ -156,52 +156,45 @@ void CoRunners::RunCore0()
     u64 cycles;
 	unsigned corenum = 0;
 
+#if defined BENCH_CONFIG_CORE0_1_1 || defined BENCH_CONFIG_CORE0_1_2
+	mydata1 = new bigstruct_t[SYNBENCH_DATASIZE];
+#endif
+#if defined BENCH_CONFIG_CORE0_1_3 || defined BENCH_CONFIG_CORE0_1_4
+	mydata1 = new bigstruct_t[SYNBENCH_DATASIZE];
+	myrandidx1 = new int[SYNBENCH_DATASIZE];
+#endif
+#ifdef BENCH_CONFIG_CORE0_2_1
+	Array1 = (volatile int*) new (HEAP_HIGH) int[NUMELEMS];
+#endif
 #ifdef BENCH_CONFIG_CORE0_3_1
 	// Disparity: initialization part 1, allocate memory for data
-	// and make seed
-	// int seed = corenum + 1;
-	// srand(seed);
 	int width=DISPARITY_INPUTSIZE, height=DISPARITY_INPUTSIZE;
     int WIN_SZ=4, SHIFT=8;
     I2D* srcImage1 = iMallocHandle(width, height);
     I2D* srcImage2 = iMallocHandle(width, height);
 #endif
-#ifdef BENCH_CONFIG_CORE0_2_1
-	Array1 = (volatile int*) new (HEAP_HIGH) int[NUMELEMS];
-#endif
-
-	m_log->Write(FromCoRunners, LogDebug,
-				 "Core %d is requesting memory.", corenum);
-	m_SpinLock.Acquire ();
-	m_SpinLock.Release ();
-	if (Array1 == NULL)
-		m_log->Write(FromCoRunners, LogWarning,
-					 "Core %d Array1 pointer is NULL!",
-					 corenum);
-	else
-		m_log->Write(FromCoRunners, LogDebug,
-					 "Core %d Array1 pointer is not NULL.",
-					 corenum);
 
 	/* Globally enable PMU */
 	enable_pmu();
 
 	unsigned iter=0;
 	while (1) {
+#if defined BENCH_CONFIG_CORE0_1_3 || defined BENCH_CONFIG_CORE0_1_4
+		array_access_randomize(myrandidx1, &rand);
+#endif
 #ifdef BENCH_CONFIG_CORE0_2_1
 		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
 		bsort100_Initialize(Array1, &rand);
 #endif
-#ifdef BENCH_CONFIG_CORE3_3_1
-	// Disparity initialization part 2: fill the data with random numbers
-	for (int i=0; i<(width*height); i++) {
-		srcImage1->data[i] = rand.get_number() % 256;
-		srcImage2->data[i] = rand.get_number() % 256;
-	}
+#ifdef BENCH_CONFIG_CORE0_3_1
+		// Disparity initialization part 2: fill the data with random numbers
+		for (int i=0; i<(width*height); i++) {
+			srcImage1->data[i] = rand.GetNumber() % 256;
+			srcImage2->data[i] = rand.GetNumber() % 256;
+		}
 #endif
-#if defined BENCH_CONFIG_CORE0_1_3 || defined BENCH_CONFIG_CORE0_1_4
-		array_access_randomize(m_randidx1, &rand);
 #endif
+
 		SyncMaster(m_SyncLock);
 
 		enable_cycle_counter();
@@ -227,21 +220,23 @@ void CoRunners::RunCore1()
     u64 cycles;
 	unsigned corenum = 1;
 
-	m_log->Write(FromCoRunners, LogDebug,
-				 "Core %d is requesting memory.", corenum);
-
-	m_SpinLock.Acquire ();
-	m_data2 = new bigstruct_t[SYNBENCH_DATASIZE];
-	m_randidx2 = new int[SYNBENCH_DATASIZE];
-	m_SpinLock.Release ();
-	if (m_data2 == NULL)
-		m_log->Write(FromCoRunners, LogWarning,
-					 "Core %d m_data2 pointer is NULL!",
-					 corenum);
-	else
-		m_log->Write(FromCoRunners, LogDebug,
-					 "Core %d m_data2 pointer is not NULL.",
-					 corenum);
+#if defined BENCH_CONFIG_CORE1_1_1 || defined BENCH_CONFIG_CORE1_1_2
+	mydata2 = new bigstruct_t[SYNBENCH_DATASIZE];
+#endif
+#if defined BENCH_CONFIG_CORE1_1_3 || defined BENCH_CONFIG_CORE1_1_4
+	mydata2 = new bigstruct_t[SYNBENCH_DATASIZE];
+	myrandidx2 = new int[SYNBENCH_DATASIZE];
+#endif
+#ifdef BENCH_CONFIG_CORE1_2_1
+	Array2 = (volatile int*) new (HEAP_HIGH) int[NUMELEMS];
+#endif
+#ifdef BENCH_CONFIG_CORE1_3_1
+	// Disparity: initialization part 1, allocate memory for data
+	int width=DISPARITY_INPUTSIZE, height=DISPARITY_INPUTSIZE;
+    int WIN_SZ=4, SHIFT=8;
+    I2D* srcImage1 = iMallocHandle(width, height);
+    I2D* srcImage2 = iMallocHandle(width, height);
+#endif
 
 	/* Globally enable PMU */
 	enable_pmu();
@@ -249,13 +244,24 @@ void CoRunners::RunCore1()
 	unsigned iter=0;
 	while (1) {
 #if defined BENCH_CONFIG_CORE1_1_3 || defined BENCH_CONFIG_CORE1_1_4
-		array_access_randomize(m_randidx2, &rand);
+		array_access_randomize(myrandidx2, &rand);
+#endif
+#ifdef BENCH_CONFIG_CORE1_2_1
+		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
+		bsort100_Initialize(Array2, &rand);
+#endif
+#ifdef BENCH_CONFIG_CORE1_3_1
+		// Disparity initialization part 2: fill the data with random numbers
+		for (int i=0; i<(width*height); i++) {
+			srcImage1->data[i] = rand.GetNumber() % 256;
+			srcImage2->data[i] = rand.GetNumber() % 256;
+		}
 #endif
 		SyncSlave(m_SyncLock, corenum);
 
 		enable_cycle_counter();
 		reset_cycle_counter();
-		array_write_random(m_data2, m_randidx2);
+		DO_BENCH_CORE1
 		disable_cycle_counter();
 		cycles = read_cycle_counter();
 
@@ -273,21 +279,23 @@ void CoRunners::RunCore2()
     u64 cycles;
 	unsigned corenum = 2;
 
-	m_log->Write(FromCoRunners, LogDebug,
-				 "Core %d is requesting memory.", corenum);
-
-	m_SpinLock.Acquire ();
-	m_data3 = new bigstruct_t[SYNBENCH_DATASIZE];
-	m_randidx3 = new int[SYNBENCH_DATASIZE];
-	m_SpinLock.Release ();
-	if (m_data3 == NULL)
-		m_log->Write(FromCoRunners, LogWarning,
-					 "Core %d m_data3 pointer is NULL!",
-					 corenum);
-	else
-		m_log->Write(FromCoRunners, LogDebug,
-					 "Core %d m_data3 pointer is not NULL.",
-					 corenum);
+#if defined BENCH_CONFIG_CORE2_1_1 || defined BENCH_CONFIG_CORE2_1_2
+	mydata3 = new bigstruct_t[SYNBENCH_DATASIZE];
+#endif
+#if defined BENCH_CONFIG_CORE2_1_3 || defined BENCH_CONFIG_CORE2_1_4
+	mydata3 = new bigstruct_t[SYNBENCH_DATASIZE];
+	myrandidx3 = new int[SYNBENCH_DATASIZE];
+#endif
+#ifdef BENCH_CONFIG_CORE2_2_1
+	Array3 = (volatile int*) new (HEAP_HIGH) int[NUMELEMS];
+#endif
+#ifdef BENCH_CONFIG_CORE2_3_1
+	// Disparity: initialization part 1, allocate memory for data
+	int width=DISPARITY_INPUTSIZE, height=DISPARITY_INPUTSIZE;
+    int WIN_SZ=4, SHIFT=8;
+    I2D* srcImage1 = iMallocHandle(width, height);
+    I2D* srcImage2 = iMallocHandle(width, height);
+#endif
 
 	/* Globally enable PMU */
 	enable_pmu();
@@ -295,13 +303,24 @@ void CoRunners::RunCore2()
 	unsigned iter=0;
 	while (1) {
 #if defined BENCH_CONFIG_CORE2_1_3 || defined BENCH_CONFIG_CORE2_1_4
-		array_access_randomize(m_randidx3, &rand);
+		array_access_randomize(myrandidx3, &rand);
+#endif
+#ifdef BENCH_CONFIG_CORE2_2_1
+		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
+		bsort100_Initialize(Array3, &rand);
+#endif
+#ifdef BENCH_CONFIG_CORE2_3_1
+		// Disparity initialization part 2: fill the data with random numbers
+		for (int i=0; i<(width*height); i++) {
+			srcImage1->data[i] = rand.GetNumber() % 256;
+			srcImage2->data[i] = rand.GetNumber() % 256;
+		}
 #endif
 		SyncSlave(m_SyncLock, corenum);
 
 		enable_cycle_counter();
 		reset_cycle_counter();
-		array_write_random(m_data3, m_randidx3);
+		DO_BENCH_CORE2
 		disable_cycle_counter();
 		cycles = read_cycle_counter();
 
@@ -319,21 +338,23 @@ void CoRunners::RunCore3()
     u64 cycles;
 	unsigned corenum = 3;
 
-	m_log->Write(FromCoRunners, LogDebug,
-				 "Core %d is requesting memory.", corenum);
-
-	m_SpinLock.Acquire ();
-	m_data4 = new bigstruct_t[SYNBENCH_DATASIZE];
-	m_randidx4 = new int[SYNBENCH_DATASIZE];
-	m_SpinLock.Release ();
-	if (m_data4 == NULL)
-		m_log->Write(FromCoRunners, LogWarning,
-					 "Core %d m_data4 pointer is NULL!",
-					 corenum);
-	else
-		m_log->Write(FromCoRunners, LogDebug,
-					 "Core %d m_data4 pointer is not NULL.",
-					 corenum);
+#if defined BENCH_CONFIG_CORE3_1_1 || defined BENCH_CONFIG_CORE3_1_2
+	mydata4 = new bigstruct_t[SYNBENCH_DATASIZE];
+#endif
+#if defined BENCH_CONFIG_CORE3_1_3 || defined BENCH_CONFIG_CORE3_1_4
+	mydata4 = new bigstruct_t[SYNBENCH_DATASIZE];
+	myrandidx4 = new int[SYNBENCH_DATASIZE];
+#endif
+#ifdef BENCH_CONFIG_CORE3_2_1
+	Array4 = (volatile int*) new (HEAP_HIGH) int[NUMELEMS];
+#endif
+#ifdef BENCH_CONFIG_CORE3_3_1
+	// Disparity: initialization part 1, allocate memory for data
+	int width=DISPARITY_INPUTSIZE, height=DISPARITY_INPUTSIZE;
+    int WIN_SZ=4, SHIFT=8;
+    I2D* srcImage1 = iMallocHandle(width, height);
+    I2D* srcImage2 = iMallocHandle(width, height);
+#endif
 
 	/* Globally enable PMU */
 	enable_pmu();
@@ -341,13 +362,24 @@ void CoRunners::RunCore3()
 	unsigned iter=0;
 	while (1) {
 #if defined BENCH_CONFIG_CORE3_1_3 || defined BENCH_CONFIG_CORE3_1_4
-		array_access_randomize(m_randidx4, &rand);
+		array_access_randomize(myrandidx4, &rand);
+#endif
+#ifdef BENCH_CONFIG_CORE3_2_1
+		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
+		bsort100_Initialize(Array4, &rand);
+#endif
+#ifdef BENCH_CONFIG_CORE3_3_1
+		// Disparity initialization part 2: fill the data with random numbers
+		for (int i=0; i<(width*height); i++) {
+			srcImage1->data[i] = rand.GetNumber() % 256;
+			srcImage2->data[i] = rand.GetNumber() % 256;
+		}
 #endif
 		SyncSlave(m_SyncLock, corenum);
 
 		enable_cycle_counter();
 		reset_cycle_counter();
-		array_write_random(m_data4, m_randidx4);
+		DO_BENCH_CORE3
 		disable_cycle_counter();
 		cycles = read_cycle_counter();
 
