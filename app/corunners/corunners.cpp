@@ -104,7 +104,7 @@ void CoRunners::SyncMaster(CSpinLock& lock)
 						 "Core0: failure to write to memory");
 
 	// Reset waiting status for master
-	if (write_bit_atomic(4, false, &m_CoreWaiting))
+	if (write_bit_atomic(0, false, &m_CoreWaiting))
 		m_log->Write(FromCoRunners, LogWarning,
 					 "Core0: failure to write to memory");
 
