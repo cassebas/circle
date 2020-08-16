@@ -70,13 +70,51 @@ CoRunners::CoRunners (CScreenDevice *pScreen, CMemorySystem *pMemorySystem)
 CoRunners::~CoRunners (void)
 {
 	m_pScreen = 0;
+#ifdef BENCH_CONFIG_CORE0_2_1
 	free((void*) Array1);
+#endif
+#ifdef BENCH_CONFIG_CORE1_2_1
+	free((void*) Array2);
+#endif
+#ifdef BENCH_CONFIG_CORE2_2_1
+	free((void*) Array3);
+#endif
+#ifdef BENCH_CONFIG_CORE3_2_1
+	free((void*) Array4);
+#endif
+
+#if defined BENCH_CONFIG_CORE0_1_1 || defined BENCH_CONFIG_CORE0_1_2
+	free((void*) mydata1);
+#else
+	#if defined BENCH_CONFIG_CORE0_1_3 || defined BENCH_CONFIG_CORE0_1_4
+	free((void*) mydata1);
+	free((void*) myrandidx1);
+	#endif
+#endif
+#if defined BENCH_CONFIG_CORE1_1_1 || defined BENCH_CONFIG_CORE1_1_2
 	free((void*) mydata2);
-	free((void*) mydata3);
-	free((void*) mydata4);
+#else
+	#if defined BENCH_CONFIG_CORE1_1_3 || defined BENCH_CONFIG_CORE1_1_4
+	free((void*) mydata2);
 	free((void*) myrandidx2);
+	#endif
+#endif
+#if defined BENCH_CONFIG_CORE2_1_1 || defined BENCH_CONFIG_CORE2_1_2
+	free((void*) mydata3);
+#else
+	#if defined BENCH_CONFIG_CORE2_1_3 || defined BENCH_CONFIG_CORE2_1_4
+	free((void*) mydata3);
 	free((void*) myrandidx3);
+	#endif
+#endif
+#if defined BENCH_CONFIG_CORE3_1_1 || defined BENCH_CONFIG_CORE3_1_2
+	free((void*) mydata4);
+#else
+	#if defined BENCH_CONFIG_CORE3_1_3 || defined BENCH_CONFIG_CORE3_1_4
+	free((void*) mydata4);
 	free((void*) myrandidx4);
+	#endif
+#endif
 }
 
 void CoRunners::SyncMaster(CSpinLock& lock)
@@ -186,6 +224,11 @@ void CoRunners::RunCore0()
 		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
 		bsort100_Initialize(Array1, &rand);
 #endif
+#ifdef BENCH_CONFIG_CORE0_2_3
+		/* Maybe initialize the matmult matrix with random nrs (each iteration) */
+		matmult_Initialize(matA1);
+		matmult_Initialize(matB1);
+#endif
 #ifdef BENCH_CONFIG_CORE0_3_1
 		// Disparity initialization part 2: fill the data with random numbers
 		for (int i=0; i<(width*height); i++) {
@@ -257,6 +300,11 @@ void CoRunners::RunCore1()
 		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
 		bsort100_Initialize(Array2, &rand);
 #endif
+#ifdef BENCH_CONFIG_CORE1_2_3
+		/* Maybe initialize the matmult matrix with random nrs (each iteration) */
+		matmult_Initialize(matA2);
+		matmult_Initialize(matB2);
+#endif
 #ifdef BENCH_CONFIG_CORE1_3_1
 		// Disparity initialization part 2: fill the data with random numbers
 		for (int i=0; i<(width*height); i++) {
@@ -324,6 +372,11 @@ void CoRunners::RunCore2()
 		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
 		bsort100_Initialize(Array3, &rand);
 #endif
+#ifdef BENCH_CONFIG_CORE2_2_3
+		/* Maybe initialize the matmult matrix with random nrs (each iteration) */
+		matmult_Initialize(matA3);
+		matmult_Initialize(matB3);
+#endif
 #ifdef BENCH_CONFIG_CORE2_3_1
 		// Disparity initialization part 2: fill the data with random numbers
 		for (int i=0; i<(width*height); i++) {
@@ -390,6 +443,11 @@ void CoRunners::RunCore3()
 #ifdef BENCH_CONFIG_CORE3_2_1
 		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
 		bsort100_Initialize(Array4, &rand);
+#endif
+#ifdef BENCH_CONFIG_CORE3_2_3
+		/* Maybe initialize the matmult matrix with random nrs (each iteration) */
+		matmult_Initialize(matA4);
+		matmult_Initialize(matB4);
 #endif
 #ifdef BENCH_CONFIG_CORE3_3_1
 		// Disparity initialization part 2: fill the data with random numbers
