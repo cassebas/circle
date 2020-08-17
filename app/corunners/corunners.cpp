@@ -70,51 +70,14 @@ CoRunners::CoRunners (CScreenDevice *pScreen, CMemorySystem *pMemorySystem)
 CoRunners::~CoRunners (void)
 {
 	m_pScreen = 0;
-#ifdef BENCH_CONFIG_CORE0_2_1
-	free((void*) Array1);
-#endif
-#ifdef BENCH_CONFIG_CORE1_2_1
-	free((void*) Array2);
-#endif
-#ifdef BENCH_CONFIG_CORE2_2_1
-	free((void*) Array3);
-#endif
-#ifdef BENCH_CONFIG_CORE3_2_1
-	free((void*) Array4);
-#endif
-
-#if defined BENCH_CONFIG_CORE0_1_1 || defined BENCH_CONFIG_CORE0_1_2
-	free((void*) mydata1);
-#else
-	#if defined BENCH_CONFIG_CORE0_1_3 || defined BENCH_CONFIG_CORE0_1_4
-	free((void*) mydata1);
-	free((void*) myrandidx1);
-	#endif
-#endif
-#if defined BENCH_CONFIG_CORE1_1_1 || defined BENCH_CONFIG_CORE1_1_2
-	free((void*) mydata2);
-#else
-	#if defined BENCH_CONFIG_CORE1_1_3 || defined BENCH_CONFIG_CORE1_1_4
-	free((void*) mydata2);
-	free((void*) myrandidx2);
-	#endif
-#endif
-#if defined BENCH_CONFIG_CORE2_1_1 || defined BENCH_CONFIG_CORE2_1_2
-	free((void*) mydata3);
-#else
-	#if defined BENCH_CONFIG_CORE2_1_3 || defined BENCH_CONFIG_CORE2_1_4
-	free((void*) mydata3);
-	free((void*) myrandidx3);
-	#endif
-#endif
-#if defined BENCH_CONFIG_CORE3_1_1 || defined BENCH_CONFIG_CORE3_1_2
-	free((void*) mydata4);
-#else
-	#if defined BENCH_CONFIG_CORE3_1_3 || defined BENCH_CONFIG_CORE3_1_4
-	free((void*) mydata4);
-	free((void*) myrandidx4);
-	#endif
-#endif
+	///////////////////////
+	// CLEANUP VARIABLES //
+	///////////////////////
+	BENCH_CLEANUP_CORE0
+	BENCH_CLEANUP_CORE1
+	BENCH_CLEANUP_CORE2
+	BENCH_CLEANUP_CORE3
+	///////////////////////
 }
 
 void CoRunners::SyncMaster(CSpinLock& lock)
@@ -194,48 +157,22 @@ void CoRunners::RunCore0()
     u64 cycles;
 	unsigned corenum = 0;
 
-#if defined BENCH_CONFIG_CORE0_1_1 || defined BENCH_CONFIG_CORE0_1_2
-	mydata1 = new bigstruct_t[SYNBENCH_DATASIZE];
-#endif
-#if defined BENCH_CONFIG_CORE0_1_3 || defined BENCH_CONFIG_CORE0_1_4
-	mydata1 = new bigstruct_t[SYNBENCH_DATASIZE];
-	myrandidx1 = new int[SYNBENCH_DATASIZE];
-#endif
-#ifdef BENCH_CONFIG_CORE0_2_1
-	Array1 = (volatile int*) new (HEAP_HIGH) int[NUMELEMS];
-#endif
-#ifdef BENCH_CONFIG_CORE0_3_1
-	// Disparity: initialization part 1, allocate memory for data
-	int width=DISPARITY_INPUTSIZE, height=DISPARITY_INPUTSIZE;
-    int WIN_SZ=4, SHIFT=8;
-    I2D* srcImage1 = iMallocHandle(width, height);
-    I2D* srcImage2 = iMallocHandle(width, height);
-#endif
+	/////////////////////
+	// Benchmark INIT1 //
+	/////////////////////
+	BENCH_INIT1_CORE0
+	/////////////////////
 
 	/* Globally enable PMU */
 	enable_pmu();
 
 	unsigned iter=0;
 	while (1) {
-#if defined BENCH_CONFIG_CORE0_1_3 || defined BENCH_CONFIG_CORE0_1_4
-		array_access_randomize(myrandidx1, &rand);
-#endif
-#ifdef BENCH_CONFIG_CORE0_2_1
-		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
-		bsort100_Initialize(Array1, &rand);
-#endif
-#ifdef BENCH_CONFIG_CORE0_2_3
-		/* Maybe initialize the matmult matrix with random nrs (each iteration) */
-		matmult_Initialize(matA1);
-		matmult_Initialize(matB1);
-#endif
-#ifdef BENCH_CONFIG_CORE0_3_1
-		// Disparity initialization part 2: fill the data with random numbers
-		for (int i=0; i<(width*height); i++) {
-			srcImage1->data[i] = rand.GetNumber() % 256;
-			srcImage2->data[i] = rand.GetNumber() % 256;
-		}
-#endif
+		/////////////////////
+		// Benchmark INIT2 //
+		/////////////////////
+		BENCH_INIT2_CORE0
+		/////////////////////
 
 #ifndef DISABLE_CACHE
 	#ifndef NO_CACHE_MGMT
@@ -249,7 +186,11 @@ void CoRunners::RunCore0()
 
 		enable_cycle_counter();
 		reset_cycle_counter();
+		///////////////////
+		// DO BENCHMARK! //
+		///////////////////
 		DO_BENCH_CORE0
+		///////////////////
 		disable_cycle_counter();
 		cycles = read_cycle_counter();
 
@@ -270,48 +211,22 @@ void CoRunners::RunCore1()
     u64 cycles;
 	unsigned corenum = 1;
 
-#if defined BENCH_CONFIG_CORE1_1_1 || defined BENCH_CONFIG_CORE1_1_2
-	mydata2 = new bigstruct_t[SYNBENCH_DATASIZE];
-#endif
-#if defined BENCH_CONFIG_CORE1_1_3 || defined BENCH_CONFIG_CORE1_1_4
-	mydata2 = new bigstruct_t[SYNBENCH_DATASIZE];
-	myrandidx2 = new int[SYNBENCH_DATASIZE];
-#endif
-#ifdef BENCH_CONFIG_CORE1_2_1
-	Array2 = (volatile int*) new (HEAP_HIGH) int[NUMELEMS];
-#endif
-#ifdef BENCH_CONFIG_CORE1_3_1
-	// Disparity: initialization part 1, allocate memory for data
-	int width=DISPARITY_INPUTSIZE, height=DISPARITY_INPUTSIZE;
-    int WIN_SZ=4, SHIFT=8;
-    I2D* srcImage1 = iMallocHandle(width, height);
-    I2D* srcImage2 = iMallocHandle(width, height);
-#endif
+	/////////////////////
+	// Benchmark INIT1 //
+	/////////////////////
+	BENCH_INIT1_CORE1
+	/////////////////////
 
 	/* Globally enable PMU */
 	enable_pmu();
 
 	unsigned iter=0;
 	while (1) {
-#if defined BENCH_CONFIG_CORE1_1_3 || defined BENCH_CONFIG_CORE1_1_4
-		array_access_randomize(myrandidx2, &rand);
-#endif
-#ifdef BENCH_CONFIG_CORE1_2_1
-		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
-		bsort100_Initialize(Array2, &rand);
-#endif
-#ifdef BENCH_CONFIG_CORE1_2_3
-		/* Maybe initialize the matmult matrix with random nrs (each iteration) */
-		matmult_Initialize(matA2);
-		matmult_Initialize(matB2);
-#endif
-#ifdef BENCH_CONFIG_CORE1_3_1
-		// Disparity initialization part 2: fill the data with random numbers
-		for (int i=0; i<(width*height); i++) {
-			srcImage1->data[i] = rand.GetNumber() % 256;
-			srcImage2->data[i] = rand.GetNumber() % 256;
-		}
-#endif
+		//////////////////////
+		// Benchmark INIT2 //
+		/////////////////////
+		BENCH_INIT2_CORE1
+		/////////////////////
 
 #ifndef DISABLE_CACHE
 	#ifndef NO_CACHE_MGMT
@@ -324,7 +239,11 @@ void CoRunners::RunCore1()
 
 		enable_cycle_counter();
 		reset_cycle_counter();
+		///////////////////
+		// DO BENCHMARK! //
+		///////////////////
 		DO_BENCH_CORE1
+		///////////////////
 		disable_cycle_counter();
 		cycles = read_cycle_counter();
 
@@ -342,48 +261,22 @@ void CoRunners::RunCore2()
     u64 cycles;
 	unsigned corenum = 2;
 
-#if defined BENCH_CONFIG_CORE2_1_1 || defined BENCH_CONFIG_CORE2_1_2
-	mydata3 = new bigstruct_t[SYNBENCH_DATASIZE];
-#endif
-#if defined BENCH_CONFIG_CORE2_1_3 || defined BENCH_CONFIG_CORE2_1_4
-	mydata3 = new bigstruct_t[SYNBENCH_DATASIZE];
-	myrandidx3 = new int[SYNBENCH_DATASIZE];
-#endif
-#ifdef BENCH_CONFIG_CORE2_2_1
-	Array3 = (volatile int*) new (HEAP_HIGH) int[NUMELEMS];
-#endif
-#ifdef BENCH_CONFIG_CORE2_3_1
-	// Disparity: initialization part 1, allocate memory for data
-	int width=DISPARITY_INPUTSIZE, height=DISPARITY_INPUTSIZE;
-    int WIN_SZ=4, SHIFT=8;
-    I2D* srcImage1 = iMallocHandle(width, height);
-    I2D* srcImage2 = iMallocHandle(width, height);
-#endif
+	/////////////////////
+	// Benchmark INIT1 //
+	/////////////////////
+	BENCH_INIT1_CORE2
+	/////////////////////
 
 	/* Globally enable PMU */
 	enable_pmu();
 
 	unsigned iter=0;
 	while (1) {
-#if defined BENCH_CONFIG_CORE2_1_3 || defined BENCH_CONFIG_CORE2_1_4
-		array_access_randomize(myrandidx3, &rand);
-#endif
-#ifdef BENCH_CONFIG_CORE2_2_1
-		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
-		bsort100_Initialize(Array3, &rand);
-#endif
-#ifdef BENCH_CONFIG_CORE2_2_3
-		/* Maybe initialize the matmult matrix with random nrs (each iteration) */
-		matmult_Initialize(matA3);
-		matmult_Initialize(matB3);
-#endif
-#ifdef BENCH_CONFIG_CORE2_3_1
-		// Disparity initialization part 2: fill the data with random numbers
-		for (int i=0; i<(width*height); i++) {
-			srcImage1->data[i] = rand.GetNumber() % 256;
-			srcImage2->data[i] = rand.GetNumber() % 256;
-		}
-#endif
+		/////////////////////
+		// Benchmark INIT2 //
+		/////////////////////
+		BENCH_INIT2_CORE2
+		/////////////////////
 
 #ifndef DISABLE_CACHE
 	#ifndef NO_CACHE_MGMT
@@ -396,7 +289,11 @@ void CoRunners::RunCore2()
 
 		enable_cycle_counter();
 		reset_cycle_counter();
+		///////////////////
+		// DO BENCHMARK! //
+		///////////////////
 		DO_BENCH_CORE2
+		///////////////////
 		disable_cycle_counter();
 		cycles = read_cycle_counter();
 
@@ -414,48 +311,22 @@ void CoRunners::RunCore3()
     u64 cycles;
 	unsigned corenum = 3;
 
-#if defined BENCH_CONFIG_CORE3_1_1 || defined BENCH_CONFIG_CORE3_1_2
-	mydata4 = new bigstruct_t[SYNBENCH_DATASIZE];
-#endif
-#if defined BENCH_CONFIG_CORE3_1_3 || defined BENCH_CONFIG_CORE3_1_4
-	mydata4 = new bigstruct_t[SYNBENCH_DATASIZE];
-	myrandidx4 = new int[SYNBENCH_DATASIZE];
-#endif
-#ifdef BENCH_CONFIG_CORE3_2_1
-	Array4 = (volatile int*) new (HEAP_HIGH) int[NUMELEMS];
-#endif
-#ifdef BENCH_CONFIG_CORE3_3_1
-	// Disparity: initialization part 1, allocate memory for data
-	int width=DISPARITY_INPUTSIZE, height=DISPARITY_INPUTSIZE;
-    int WIN_SZ=4, SHIFT=8;
-    I2D* srcImage1 = iMallocHandle(width, height);
-    I2D* srcImage2 = iMallocHandle(width, height);
-#endif
+	/////////////////////
+	// Benchmark INIT1 //
+	/////////////////////
+	BENCH_INIT1_CORE3
+	/////////////////////
 
 	/* Globally enable PMU */
 	enable_pmu();
 
 	unsigned iter=0;
 	while (1) {
-#if defined BENCH_CONFIG_CORE3_1_3 || defined BENCH_CONFIG_CORE3_1_4
-		array_access_randomize(myrandidx4, &rand);
-#endif
-#ifdef BENCH_CONFIG_CORE3_2_1
-		/* Maybe initialize the bsort100 array with random nrs (each iteration) */
-		bsort100_Initialize(Array4, &rand);
-#endif
-#ifdef BENCH_CONFIG_CORE3_2_3
-		/* Maybe initialize the matmult matrix with random nrs (each iteration) */
-		matmult_Initialize(matA4);
-		matmult_Initialize(matB4);
-#endif
-#ifdef BENCH_CONFIG_CORE3_3_1
-		// Disparity initialization part 2: fill the data with random numbers
-		for (int i=0; i<(width*height); i++) {
-			srcImage1->data[i] = rand.GetNumber() % 256;
-			srcImage2->data[i] = rand.GetNumber() % 256;
-		}
-#endif
+		/////////////////////
+		// Benchmark INIT2 //
+		/////////////////////
+		BENCH_INIT2_CORE3
+		/////////////////////
 
 #ifndef DISABLE_CACHE
 	#ifndef NO_CACHE_MGMT
@@ -468,7 +339,11 @@ void CoRunners::RunCore3()
 
 		enable_cycle_counter();
 		reset_cycle_counter();
+		///////////////////
+		// DO BENCHMARK! //
+		///////////////////
 		DO_BENCH_CORE3
+		///////////////////
 		disable_cycle_counter();
 		cycles = read_cycle_counter();
 

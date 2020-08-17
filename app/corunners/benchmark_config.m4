@@ -42,17 +42,29 @@ define(bench_string_core_undef, `
 #ifdef BENCH_STRING_CORE`$1'
 #undef BENCH_STRING_CORE`$1'
 #endif')dnl
-define(bench_arg_core_undef, `
-#ifdef BENCH_ARG_CORE`$1'
-#undef BENCH_ARG_CORE`$1'
-#endif')dnl
 define(bench_config_core_undef, `
 #ifdef BENCH_CONFIG_CORE`$1'
 #undef BENCH_CONFIG_CORE`$1'
 #endif')dnl
+define(bench_decl_core_undef, `
+#ifdef BENCH_DECL_CORE`$1'
+#undef BENCH_DECL_CORE`$1'
+#endif')dnl
+define(bench_init1_core_undef, `
+#ifdef BENCH_INIT1_CORE`$1'
+#undef BENCH_INIT1_CORE`$1'
+#endif')dnl
+define(bench_init2_core_undef, `
+#ifdef BENCH_INIT2_CORE`$1'
+#undef BENCH_INIT2_CORE`$1'
+#endif')dnl
 define(do_bench_core_undef, `
 #ifdef DO_BENCH_CORE`$1'
 #undef DO_BENCH_CORE`$1'
+#endif')dnl
+define(bench_cleanup_core_undef, `
+#ifdef BENCH_CLEANUP_CORE`$1'
+#undef BENCH_CLEANUP_CORE`$1'
 #endif')dnl
 define(pmu_event_core_undef, `
 #ifdef PMU_EVENT_CORE`$1'
@@ -91,10 +103,11 @@ dnl index of the second inner for loop as the macro's argument.
 define(macro_tripleloop, `forloop(`i', `$1', `$2',
                          `forloop(`j', `$3', `$4',
                          `forloop(`k', `$5', `$6', `$7(i`_'j`_'k)')')')')dnl
+
+dnl **************************************
+dnl BENCHMARK NAMES FOR USAGE IN REPORTING
+dnl **************************************
 dnl
-/**
- * Benchmark name macros for lookup function
- */
 dnl series nr 1: synthetic benchmarks
 define(bench_name1_1, linear_array_access)dnl
 define(bench_name1_2, linear_array_write)dnl
@@ -107,35 +120,133 @@ define(bench_name2_3, malardalen_matmult)dnl
 dnl series nr 2: SD-VBS
 define(bench_name3_1, sdvbs_disparity)dnl
 dnl
-define(lookup_name, bench_name$1_$2)dnl
+define(call_bench_name, bench_name$1_$2)dnl
 
-dnl series nr 1: synthetic benchmarks
-define(bench_arg1_1, mydata$1)dnl
-define(bench_arg1_2, mydata$1)dnl
-define(bench_arg1_3, `mydata$1, myrandidx$1')dnl
-define(bench_arg1_4, `mydata$1, myrandidx$1')dnl
-dnl series nr 2: Mälardalen
-define(bench_arg2_1, Array$1)dnl
-define(bench_arg2_2)dnl
-define(bench_arg2_3, `matA$1, matB$1, matC$1')dnl
-dnl series nr 3: SD-VBS
-define(bench_arg3_1)dnl
+dnl **********************************
+dnl DECLARATION OF BENCHMARK VARIABLES
+dnl **********************************
 dnl
-define(lookup_arg, bench_arg$1_$2($3))dnl
-
 dnl series nr 1: synthetic benchmarks
-define(do_bench1_1, array_access_linear(BENCH_ARG_CORE`$1');)dnl
-define(do_bench1_2, array_write_linear(BENCH_ARG_CORE`$1');)dnl
-define(do_bench1_3, array_access_random(BENCH_ARG_CORE`$1');)dnl
-define(do_bench1_4, array_write_random(BENCH_ARG_CORE`$1');)dnl
+define(bench_decl_1_1, `volatile bigstruct_t* mydata$1;')dnl
+define(bench_decl_1_2, `volatile bigstruct_t* mydata$1;')dnl
+define(bench_decl_1_3, `\
+	volatile bigstruct_t* mydata$1;			\
+	volatile int* myrandidx$1;
+')dnl
+define(bench_decl_1_4, `\
+	volatile bigstruct_t* mydata$1;			\
+	volatile int* myrandidx$1;
+')dnl
 dnl series nr 2: Mälardalen
-define(do_bench2_1, bsort100_BubbleSort(BENCH_ARG_CORE`$1');)dnl
+define(bench_decl_2_1, `volatile int* Array$1;')dnl
+define(bench_decl_2_2, `')dnl
+define(bench_decl_2_3, `
+	matrix matA$1;						\
+	matrix matB$1;						\
+	matrix matC$1;
+')dnl
+dnl series nr 3: SD-VBS
+define(bench_decl_3_1, `')dnl
+
+dnl *************************************
+dnl BENCHMARK INITIALIZATION 1 STATEMENTS
+dnl *************************************
+dnl
+dnl series nr 1: synthetic benchmarks
+define(bench_init1_1_1, `mydata$1 = new bigstruct_t[SYNBENCH_DATASIZE];')dnl
+define(bench_init1_1_2, `mydata$1 = new bigstruct_t[SYNBENCH_DATASIZE];')dnl
+define(bench_init1_1_3, `\
+	mydata$1 = new bigstruct_t[SYNBENCH_DATASIZE]; \
+	myrandidx$1 = new int[SYNBENCH_DATASIZE];
+')dnl
+define(bench_init1_1_4, `\
+	mydata$1 = new bigstruct_t[SYNBENCH_DATASIZE]; \
+	myrandidx$1 = new int[SYNBENCH_DATASIZE];
+')dnl
+dnl series nr 2: Mälardalen
+define(bench_init1_2_1, `Array$1 = (volatile int*) new int[NUMELEMS];')dnl
+define(bench_init1_2_2, `')dnl
+define(bench_init1_2_3, `')dnl
+dnl series nr 3: SD-VBS
+define(bench_init1_3_1, `\
+	int width=DISPARITY_INPUTSIZE, height=DISPARITY_INPUTSIZE;	\
+    int WIN_SZ=4, SHIFT=8;										\
+    I2D* srcImage1 = iMallocHandle(width, height);				\
+    I2D* srcImage2 = iMallocHandle(width, height);
+')dnl
+
+dnl *************************************
+dnl BENCHMARK INITIALIZATION 2 STATEMENTS
+dnl *************************************
+dnl
+dnl series nr 1: synthetic benchmarks
+define(bench_init2_1_1, `')dnl
+define(bench_init2_1_2, `')dnl
+define(bench_init2_1_3, `array_access_randomize(myrandidx$1, &rand);')dnl
+define(bench_init2_1_4, `array_access_randomize(myrandidx$1, &rand);')dnl
+dnl series nr 2: Mälardalen
+define(bench_init2_2_1, `bsort100_Initialize(Array$1, &rand);')dnl
+define(bench_init2_2_2, `')dnl
+define(bench_init2_2_3, `\
+	matrix matA$1;						\
+	matrix matB$1;						\
+	matrix matC$1;
+')dnl
+dnl series nr 3: SD-VBS
+define(bench_init2_3_1, `\
+	for (int `i'=0; `i'<(width*height); `i'++) { \
+		srcImage1->data[`i'] = rand.GetNumber() % 256; \
+		srcImage2->data[`i'] = rand.GetNumber() % 256; \
+	}
+')dnl
+
+
+dnl **********************************
+dnl ACTUAL STATEMENT CALLING BENCHMARK
+dnl **********************************
+dnl
+dnl series nr 1: synthetic benchmarks
+define(do_bench1_1, array_access_linear(mydata$1);)dnl
+define(do_bench1_2, array_write_linear(mydata$1);)dnl
+define(do_bench1_3, array_access_random(mydata$1, myrandidx$1);)dnl
+define(do_bench1_4, array_write_random(mydata$1, myrandidx$1);)dnl
+dnl series nr 2: Mälardalen
+define(do_bench2_1, bsort100_BubbleSort(Array$1);)dnl
 define(do_bench2_2, edn_Calculate();)dnl
-define(do_bench2_3, matmult_Multiply(BENCH_ARG_CORE`$1');)dnl
+define(do_bench2_3, matmult_Multiply(matA$1, matB$1, matC$1);)dnl
 dnl series nr 3: SD-VBS
 define(do_bench3_1, getDisparity(srcImage1, srcImage2, WIN_SZ, SHIFT);)dnl
+
+
+dnl ******************************
+dnl CLEANUP OF BENCHMARK VARIABLES
+dnl ******************************
 dnl
-define(lookup_bench, do_bench$1_$2($3))dnl
+dnl series nr 1: synthetic benchmarks
+define(bench_cleanup_1_1, `free((void*) mydata$1);')dnl
+define(bench_cleanup_1_2, `free((void*) mydata$1);')dnl
+define(bench_cleanup_1_3, `\
+	free((void*) mydata$1);						\
+	free((void*) myrandidx$1);
+')dnl
+define(bench_cleanup_1_4, `\
+	free((void*) mydata$1);						\
+	free((void*) myrandidx$1);
+')dnl
+dnl series nr 2: Mälardalen
+define(bench_cleanup_2_1, `free((void*) Array$1);')dnl
+define(bench_cleanup_2_2, `')dnl
+define(bench_cleanup_2_3, `')dnl
+dnl series nr 3: SD-VBS
+define(bench_cleanup_3_1, `')dnl
+
+
+define(call_bench_decl, bench_decl_$1_$2($3))dnl
+define(call_bench_init1, bench_init1_$1_$2($3))dnl
+define(call_bench_init2, bench_init2_$1_$2($3))dnl
+define(call_do_bench, do_bench$1_$2($3))dnl
+define(call_bench_cleanup, bench_cleanup_$1_$2($3))dnl
+
 /**
  * Macro for generation of the defines that describe the
  * configuration of the cores and specific benchmarks running
@@ -146,19 +257,36 @@ define(bench_config_core_def, `
 #define BENCH_CONFIG_CORE`$1'_`'substr(config_series, $1, 1)`_'substr(config_benchmarks, $1, 1)')dnl
 dnl
 define(bench_string_core_def, `
-#define BENCH_STRING_CORE`$1' "benchmark: lookup_name(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1))"')dnl
+#define BENCH_STRING_CORE`$1' "benchmark: call_bench_name(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1))"')dnl
 define(bench_string_core_empty_def, `
 #define BENCH_STRING_CORE`$1' ""')dnl
 dnl
-define(bench_arg_core_def, `
-#define BENCH_ARG_CORE`$1' lookup_arg(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1), eval($1+1))')dnl
-define(bench_arg_core_empty_def, `
-#define BENCH_ARG_CORE`$1' $2')dnl
-dnl
+
+define(bench_decl_core_def, `
+#define BENCH_DECL_CORE`$1' call_bench_decl(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1), `$1')')dnl
+define(bench_decl_core_empty_def, `
+#define BENCH_DECL_CORE`$1' $2')dnl
+
+define(bench_init1_core_def, `
+#define BENCH_INIT1_CORE`$1' call_bench_init1(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1), `$1')')dnl
+define(bench_init1_core_empty_def, `
+#define BENCH_INIT1_CORE`$1' $2')dnl
+
+define(bench_init2_core_def, `
+#define BENCH_INIT2_CORE`$1' call_bench_init2(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1), `$1')')dnl
+define(bench_init2_core_empty_def, `
+#define BENCH_INIT2_CORE`$1' $2')dnl
+
 define(do_bench_core_def, `
-#define DO_BENCH_CORE`$1' lookup_bench(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1), `$1')')dnl
+#define DO_BENCH_CORE`$1' call_do_bench(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1), `$1')')dnl
 define(do_bench_core_empty_def, `
 #define DO_BENCH_CORE`$1' $2')dnl
+
+define(bench_cleanup_core_def, `
+#define BENCH_CLEANUP_CORE`$1' call_bench_cleanup(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1), `$1')')dnl
+define(bench_cleanup_core_empty_def, `
+#define BENCH_CLEANUP_CORE`$1' $2')dnl
+
 dnl
 define(pmu_event0, `(PMU_L1D_CACHE_REFILL)')dnl
 define(pmu_event1, `(PMU_L1D_CACHE)')dnl
@@ -170,13 +298,16 @@ define(pmu_event6, `(PMU_L2D_CACHE)')dnl
 define(pmu_event7, `(PMU_L2D_CACHE_REFILL)')dnl
 define(pmu_event8, `(PMU_L1D_CACHE_WB)')dnl
 define(pmu_event9, `(PMU_BUS_ACCESS)')dnl
-define(lookup_pmu, pmu_event$1)dnl
+define(call_pmu_event, pmu_event$1)dnl
 dnl
 divert(0)dnl
 dnl
 macro_loop(0, 3, `bench_string_core_undef')dnl
-macro_loop(0, 3, `bench_arg_core_undef')dnl
+macro_loop(0, 3, `bench_decl_core_undef')dnl
+macro_loop(0, 3, `bench_init1_core_undef')dnl
+macro_loop(0, 3, `bench_init2_core_undef')dnl
 macro_loop(0, 3, `do_bench_core_undef')dnl
+macro_loop(0, 3, `bench_cleanup_core_undef')dnl
 macro_tripleloop(0, 3, 1, 3, 1, nr_of_benchmarks, `bench_config_core_undef')dnl
 macro_doubleloop(0, 3, 1, nr_of_pmus, `pmu_event_core_undef')dnl
 
@@ -187,11 +318,21 @@ dnl
 macro_loop(0, eval(len(config_benchmarks) - 1), `bench_string_core_def')dnl
 ifelse(len(config_benchmarks), 4, `', `macro_loop(len(config_benchmarks), 3, `bench_string_core_empty_def')')dnl
 dnl
-macro_loop(0, eval(len(config_benchmarks) - 1), `bench_arg_core_def')dnl
-ifelse(len(config_benchmarks), 4, `', `macro_loop(len(config_benchmarks), 3, `bench_arg_core_empty_def')')dnl
+macro_loop(0, eval(len(config_benchmarks) - 1), `bench_decl_core_def')dnl
+ifelse(len(config_benchmarks), 4, `', `macro_loop(len(config_benchmarks), 3, `bench_decl_core_empty_def')')dnl
+dnl
+macro_loop(0, eval(len(config_benchmarks) - 1), `bench_init1_core_def')dnl
+ifelse(len(config_benchmarks), 4, `', `macro_loop(len(config_benchmarks), 3, `bench_init1_core_empty_def')')dnl
+dnl
+macro_loop(0, eval(len(config_benchmarks) - 1), `bench_init2_core_def')dnl
+ifelse(len(config_benchmarks), 4, `', `macro_loop(len(config_benchmarks), 3, `bench_init2_core_empty_def')')dnl
 dnl
 macro_loop(0, eval(len(config_benchmarks) - 1), `do_bench_core_def')dnl
 ifelse(len(config_benchmarks), 4, `', `macro_loop(len(config_benchmarks), 3, `do_bench_core_empty_def')')dnl
+dnl
+macro_loop(0, eval(len(config_benchmarks) - 1), `bench_cleanup_core_def')dnl
+ifelse(len(config_benchmarks), 4, `', `macro_loop(len(config_benchmarks), 3, `bench_cleanup_core_empty_def')')dnl
+dnl
 
 
 #ifdef CONFIG_SERIES_STRING
@@ -214,7 +355,7 @@ dnl
 
 /* The PMU event count configuration */dnl
 define(pmu_core_def, `
-#define PMU_EVENT_CORE`$1'_`'eval($2+1)`' `'lookup_pmu(substr(pmu_core$1, $2, 1))')dnl
+#define PMU_EVENT_CORE`$1'_`'eval($2+1)`' `'call_pmu_event(substr(pmu_core$1, $2, 1))')dnl
 dnl
 define(pmu_core_def0, `pmu_core_def(0, $1)')dnl
 define(pmu_core_def1, `pmu_core_def(1, $1)')dnl
