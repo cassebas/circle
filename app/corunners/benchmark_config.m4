@@ -140,7 +140,7 @@ define(bench_decl_1_4, `\
 dnl series nr 2: Mälardalen
 define(bench_decl_2_1, `volatile int* Array$1;')dnl
 define(bench_decl_2_2, `')dnl
-define(bench_decl_2_3, `
+define(bench_decl_2_3, `\
 	matrix matA$1;						\
 	matrix matB$1;						\
 	matrix matC$1;
@@ -188,9 +188,8 @@ dnl series nr 2: Mälardalen
 define(bench_init2_2_1, `bsort100_Initialize(Array$1, &rand);')dnl
 define(bench_init2_2_2, `')dnl
 define(bench_init2_2_3, `\
-	matrix matA$1;						\
-	matrix matB$1;						\
-	matrix matC$1;
+	matmult_Initialize(matA$1);						\
+	matmult_Initialize(matB$1);
 ')dnl
 dnl series nr 3: SD-VBS
 define(bench_init2_3_1, `\
