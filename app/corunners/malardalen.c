@@ -3,6 +3,9 @@
 */
 
 #include "malardalen.h"
+#ifndef CIRCLE
+#include <stdlib.h>
+#endif
 
 /*
  * bsort100: Malardalen's Bubblesort definitions.
@@ -17,10 +20,16 @@ int factor;
 /*
  * Initializes given array with randomly generated integers.
  */
+#ifndef CIRCLE
+void bsort100_Initialize(volatile int Array[])
+#else
 void bsort100_Initialize(volatile int Array[], RandomWrapper* rand)
+#endif
 {
 	int  Index, fact;
-	/* static int seed; */
+#ifndef CIRCLE
+	static int seed;
+#endif
 
 #ifdef WORSTCASE
 	factor = -1;
@@ -28,12 +37,17 @@ void bsort100_Initialize(volatile int Array[], RandomWrapper* rand)
 	factor = 1;
 #endif
 
-	/* srand(++seed); */
+#ifndef CIRCLE
+	srand(++seed);
+#endif
 
 	fact = factor;
 	for (Index = 1; Index <= NUMELEMS; Index ++) {
-		/* Array[Index] = rand() * fact/\* * KNOWN_VALUE*\/; */
+#ifndef CIRCLE
+		Array[Index] = rand() * fact/* * KNOWN_VALUE*/;
+#else
 		Array[Index] = get_number(rand) * fact/* * KNOWN_VALUE*/;
+#endif
 	}
 }
 

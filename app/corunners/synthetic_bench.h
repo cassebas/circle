@@ -7,7 +7,9 @@
 #ifndef SYNTHETIC_BENCH_H
 #define SYNTHETIC_BENCH_H
 
+#ifdef CIRCLE
 #include "randomwrapper.h"
+#endif
 
 /**
  * We want to use a data structure that consists of more than
@@ -28,7 +30,7 @@
    If already defined in the CFLAGS (-DSYNBENCH_DATASIZE=...) then
    do nothing. */
 #ifndef SYNBENCH_DATASIZE
-#define SYNBENCH_DATASIZE 655360
+#define SYNBENCH_DATASIZE 65536
 #endif
 // To make bigstruct 64 bytes, which is equal to the line size of the caches
 // id + data == 64 bytes
@@ -51,7 +53,11 @@ typedef struct bigstruct {
 
 int array_access_linear(volatile bigstruct_t* data);
 void array_write_linear(volatile bigstruct_t* data);
+#ifdef CIRCLE
 void array_access_randomize(volatile int* idx, RandomWrapper* rand);
+#else
+void array_access_randomize(volatile int* idx, int corenum);
+#endif
 int array_access_random(volatile bigstruct_t* data, volatile int* idx);
 void array_write_random(volatile bigstruct_t* data, volatile int* idx);
 void array_access_alternate(volatile bigstruct_t* data);

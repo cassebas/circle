@@ -7,7 +7,13 @@ Slightly modified for our use case.
 #define MALARDALEN_H
 
 #include "corunners_definition.h"
+#ifdef CIRCLE
 #include "randomwrapper.h"
+#endif
+
+#ifndef CIRCLE
+#include "types.h"
+#endif
 
 /*
  * bsort100: Malardalen's Bubblesort definitions.
@@ -16,7 +22,11 @@ Slightly modified for our use case.
 #define NUMELEMS BSORT_INPUTSIZE
 #define MAXDIM   (NUMELEMS+1)
 
+#ifdef CIRCLE
 void bsort100_Initialize(volatile int Array[], RandomWrapper*);
+#else
+void bsort100_Initialize(volatile int Array[]);
+#endif
 void bsort100_BubbleSort(volatile int Array[]);
 
 

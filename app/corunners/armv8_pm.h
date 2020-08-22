@@ -1,7 +1,9 @@
 #ifndef ARMV8_PM_H
 #define ARMV8_PM_H
 
+#ifdef CIRCLE
 #include <circle/types.h>
+#endif
 
 #define ARMV8_PMCR_MASK         0x3f
 #define ARMV8_PMCR_E            (1 << 0) /* Enable all counters */
