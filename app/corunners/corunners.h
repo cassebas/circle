@@ -36,6 +36,9 @@ extern "C" {
 	#include "synthetic_bench.h"
 	#include "malardalen.h"
 	#include "sdvbs/disparity/disparity.h"
+	#include "sdvbs/mser/mser.h"
+	#include "sdvbs/svm/svm.h"
+	#include "sdvbs/stitch/stitch.h"
 }
 
 class CoRunners : public CMultiCoreSupport

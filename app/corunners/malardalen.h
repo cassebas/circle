@@ -6,13 +6,14 @@ Slightly modified for our use case.
 #ifndef MALARDALEN_H
 #define MALARDALEN_H
 
+#include "corunners_definition.h"
 #include "randomwrapper.h"
 
 /*
  * bsort100: Malardalen's Bubblesort definitions.
  */
 #define WORSTCASE 1
-#define NUMELEMS 100
+#define NUMELEMS BSORT_INPUTSIZE
 #define MAXDIM   (NUMELEMS+1)
 
 void bsort100_Initialize(volatile int Array[], RandomWrapper*);
@@ -20,31 +21,41 @@ void bsort100_BubbleSort(volatile int Array[]);
 
 
 /*
- * edn: Malardalen's Finite Impulse Response (FIR) filter calculations.
+ * ns: Malardalen's test of deeply nested loops and non-local exits.
  */
-#define N 100
-#define ORDER 50
+#define NS_ELEMS NS_INPUTSIZE
 
-void vec_mpy1(short y[], const short x[], short scaler);
-long int mac(const short *a, const short *b, long int sqr, long int *sum);
-void fir(const short array1[], const short coeff[], long int output[]);
-void fir_no_red_ld(const short x[], const short h[], long int y[]);
-long int latsynth(short b[], const short k[], long int n, long int f);
-void iir1(const short *coefs, const short *input, long int *optr, long int *state);
-long int codebook(long int mask, long int bitchanged, long int numbasis, long int codeword, long int g, const short *d, short ddim, short theta);
-void jpegdct(short *d, short *r);
+void ns_Initialize(int (*keys)[NS_ELEMS][NS_ELEMS][NS_ELEMS],
+				   int (*answer)[NS_ELEMS][NS_ELEMS][NS_ELEMS]);
+int foo(int (*keys)[NS_ELEMS][NS_ELEMS][NS_ELEMS],
+		int (*answer)[NS_ELEMS][NS_ELEMS][NS_ELEMS],
+		int x);
+void ns_foo(int (*keys)[NS_ELEMS][NS_ELEMS][NS_ELEMS],
+			int (*answer)[NS_ELEMS][NS_ELEMS][NS_ELEMS]);
 
-void edn_Calculate(void);
 
 /*
  * matmult: Malardalen's Matrix multiplication of two matrices.
  */
-#define UPPERLIMIT 100
+#define UPPERLIMIT MATMULT_INPUTSIZE
 typedef int matrix [UPPERLIMIT][UPPERLIMIT];
 
 void matmult_Multiply(matrix A, matrix B, matrix Res);
 void matmult_InitSeed(void);
 void matmult_Initialize(matrix Array);
 int matmult_RandomInteger(void);
+
+
+/*
+ * fir: Malardalen's Finite Input Response implementation.
+ */
+#define FIR_NUMELEMS FIR_INPUTSIZE
+#define FIR_COEFFSIZE 36
+#define FIR_SCALE 285
+
+void fir_Initialize(long* in_data);
+void fir_filter_int(long* in, long* out, long in_len,
+					long* coef, long coef_len,
+					long scale);
 
 #endif /* MALARDALEN_H */

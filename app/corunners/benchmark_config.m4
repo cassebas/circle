@@ -11,9 +11,13 @@ changecom(/*,*/)dnl
  * 1-3: random array access
  * 1-4: random array write
  * 2-1: mälardalen bsort 100
- * 2-2: mälardalen edn
+ * 2-2: mälardalen ns
  * 2-3: mälardalen matmult
+ * 2-4: mälardalen fir
  * 3-1: sd-vbs disparity
+ * 3-2: sd-vbs mser
+ * 3-3: sd-vbs svm
+ * 3-4: sd-vbs stitch
  *
  * The BENCH_CONFIG definition prescribes the specific benchmarks running
  * on the specific cores. If only one benchmark runs on multiple cores, the
@@ -115,10 +119,14 @@ define(bench_name1_3, random_array_access)dnl
 define(bench_name1_4, random_array_write)dnl
 dnl series nr 2: Mälardalen
 define(bench_name2_1, malardalen_bsort100)dnl
-define(bench_name2_2, malardalen_edn)dnl
+define(bench_name2_2, malardalen_ns)dnl
 define(bench_name2_3, malardalen_matmult)dnl
+define(bench_name2_4, malardalen_fir)dnl
 dnl series nr 2: SD-VBS
 define(bench_name3_1, sdvbs_disparity)dnl
+define(bench_name3_2, sdvbs_mser)dnl
+define(bench_name3_3, sdvbs_svm)dnl
+define(bench_name3_4, sdvbs_stitch)dnl
 dnl
 define(call_bench_name, bench_name$1_$2)dnl
 
@@ -139,14 +147,29 @@ define(bench_decl_1_4, `\
 ')dnl
 dnl series nr 2: Mälardalen
 define(bench_decl_2_1, `volatile int* Array$1;')dnl
-define(bench_decl_2_2, `')dnl
+define(bench_decl_2_2, `\
+	int (*keys$1)[NS_ELEMS][NS_ELEMS][NS_ELEMS];	\
+	int (*answer$1)[NS_ELEMS][NS_ELEMS][NS_ELEMS];
+')dnl
 define(bench_decl_2_3, `\
 	matrix matA$1;						\
 	matrix matB$1;						\
 	matrix matC$1;
 ')dnl
+define(bench_decl_2_4, `\
+    long fir_int$1[FIR_COEFFSIZE]={\
+0xfffffffe, 0x1, 0x4, 0x3, 0xfffffffe, 0xfffffffc, 0x2, 0x7, 0x0,			\
+0xfffffff7, 0xfffffffc, 0xc, 0xb, 0xfffffff2, 0xffffffe6, 0xf, 0x59, 0x7f,	\
+0x59, 0xf, 0xffffffe6, 0xfffffff2, 0xb, 0xc, 0xfffffffc, 0xfffffff7, 0x0,	\
+0x7, 0x2, 0xfffffffc, 0xfffffffe, 0x3, 0x4, 0x1, 0xfffffffe, 0};			\
+    long* in_data$1;														\
+    long* output$1;
+')dnl
 dnl series nr 3: SD-VBS
 define(bench_decl_3_1, `')dnl
+define(bench_decl_3_2, `')dnl
+define(bench_decl_3_3, `')dnl
+define(bench_decl_3_4, `')dnl
 
 dnl *************************************
 dnl BENCHMARK INITIALIZATION 1 STATEMENTS
@@ -165,14 +188,41 @@ define(bench_init1_1_4, `\
 ')dnl
 dnl series nr 2: Mälardalen
 define(bench_init1_2_1, `Array$1 = (volatile int*) new int[NUMELEMS];')dnl
-define(bench_init1_2_2, `')dnl
+define(bench_init1_2_2, `\
+	/* nr of elements in 4-dim array */										\
+	int num_elems = NS_INPUTSIZE * NS_INPUTSIZE * NS_INPUTSIZE * NS_INPUTSIZE;	\
+	keys$1 = (int (*)[NS_ELEMS][NS_ELEMS][NS_ELEMS]) malloc(sizeof(int) * num_elems);\
+	answer$1 = (int (*)[NS_ELEMS][NS_ELEMS][NS_ELEMS]) malloc(sizeof(int) * num_elems);\
+	ns_Initialize(keys$1, answer$1);')dnl
 define(bench_init1_2_3, `')dnl
+define(bench_init1_2_4, `\
+	in_data$1 = (long*) malloc(sizeof(long) * FIR_NUMELEMS);				\
+	output$1 = (long*) malloc(sizeof(long) * FIR_NUMELEMS);
+	')dnl
 dnl series nr 3: SD-VBS
 define(bench_init1_3_1, `\
 	int width=DISPARITY_INPUTSIZE, height=DISPARITY_INPUTSIZE;	\
-    int WIN_SZ=4, SHIFT=8;										\
-    I2D* srcImage1 = iMallocHandle(width, height);				\
-    I2D* srcImage2 = iMallocHandle(width, height);
+	int WIN_SZ=4, SHIFT=8;										\
+	I2D* srcImage1 = iMallocHandle(width, height);				\
+	I2D* srcImage2 = iMallocHandle(width, height);
+')dnl
+define(bench_init1_3_2, `\
+	int width=MSER_INPUTSIZE, height=MSER_INPUTSIZE;		\
+	int in_delta=2;										\
+	I2D* srcImage = iMallocHandle(width, height);
+')dnl
+define(bench_init1_3_3, `\
+	int svm_iter = 8;										\
+    int svm_N = SVM_INPUTSIZE;								\
+    int svm_Ntst = SVM_INPUTSIZE;							\
+    F2D* svm_trn1 = fMallocHandle(svm_N, svm_N);			\
+    F2D* svm_trn2 = fMallocHandle(svm_N, svm_N);			\
+    F2D* svm_tst1 = fMallocHandle(svm_N, svm_N);			\
+    F2D* svm_tst2 = fMallocHandle(svm_N, svm_N);
+')dnl
+define(bench_init1_3_4, `\
+    int stitch_N = STITCH_INPUTSIZE;						\
+	I2D* Icur = iMallocHandle(stitch_N, stitch_N);
 ')dnl
 
 dnl *************************************
@@ -191,11 +241,37 @@ define(bench_init2_2_3, `\
 	matmult_Initialize(matA$1);						\
 	matmult_Initialize(matB$1);
 ')dnl
+define(bench_init2_2_4, `\
+	fir_Initialize(in_data$1);
+')dnl
 dnl series nr 3: SD-VBS
 define(bench_init2_3_1, `\
 	for (int `i'=0; `i'<(width*height); `i'++) { \
 		srcImage1->data[`i'] = rand.GetNumber() % 256; \
 		srcImage2->data[`i'] = rand.GetNumber() % 256; \
+	}
+')dnl
+define(bench_init2_3_2, `\
+	for (int `i'=0; `i'<(width*height); `i'++) {				\
+		srcImage->data[`i'] = rand.GetNumber() % 256;			\
+	}
+')dnl
+define(bench_init2_3_3, `\
+	float r;													\
+	for (int `i'=0; `i'<(svm_N*svm_N); `i'++) {				\
+		r = (float) (rand.GetSmallFloat());					\
+		svm_trn1->data[`i'] = r;								\
+		r = (float) (rand.GetSmallFloat());					\
+		svm_trn2->data[`i'] = r;								\
+		r = (float) (rand.GetSmallFloat());					\
+		svm_tst1->data[`i'] = r;								\
+		r = (float) (rand.GetSmallFloat());					\
+		svm_tst2->data[`i'] = r;								\
+	}
+')dnl
+define(bench_init2_3_4, `\
+	for (int `i'=0; `i'<(stitch_N*stitch_N); `i'++) {			\
+		Icur->data[`i'] = rand.GetNumber() % 256;			\
 	}
 ')dnl
 
@@ -211,10 +287,14 @@ define(do_bench1_3, array_access_random(mydata$1, myrandidx$1);)dnl
 define(do_bench1_4, array_write_random(mydata$1, myrandidx$1);)dnl
 dnl series nr 2: Mälardalen
 define(do_bench2_1, bsort100_BubbleSort(Array$1);)dnl
-define(do_bench2_2, edn_Calculate();)dnl
+define(do_bench2_2, ns_foo(keys$1, answer$1);)dnl
 define(do_bench2_3, matmult_Multiply(matA$1, matB$1, matC$1);)dnl
+define(do_bench2_4, fir_filter_int(in_data$1,output$1,FIR_NUMELEMS,fir_int$1,FIR_COEFFSIZE-1,FIR_SCALE);)dnl
 dnl series nr 3: SD-VBS
 define(do_bench3_1, getDisparity(srcImage1, srcImage2, WIN_SZ, SHIFT);)dnl
+define(do_bench3_2, mser(srcImage, in_delta);)dnl
+define(do_bench3_3, svm_wrapper(svm_trn1, svm_tst1, svm_trn2, svm_tst2, svm_iter, svm_N, svm_Ntst);)dnl
+define(do_bench3_4, stitch_wrapper(Icur);)dnl
 
 
 dnl ******************************
@@ -236,8 +316,12 @@ dnl series nr 2: Mälardalen
 define(bench_cleanup_2_1, `free((void*) Array$1);')dnl
 define(bench_cleanup_2_2, `')dnl
 define(bench_cleanup_2_3, `')dnl
+define(bench_cleanup_2_4, `')dnl
 dnl series nr 3: SD-VBS
 define(bench_cleanup_3_1, `')dnl
+define(bench_cleanup_3_2, `')dnl
+define(bench_cleanup_3_3, `')dnl
+define(bench_cleanup_3_4, `')dnl
 
 
 define(call_bench_decl, bench_decl_$1_$2($3))dnl
@@ -417,6 +501,33 @@ define(disparity_inputsize_template, `
 ')dnl
 ifdef(`disparity_inputsize', disparity_inputsize_template(disparity_inputsize), `')dnl
 
+dnl SD-VBS mser: size of input image
+define(mser_inputsize_template, `
+#ifdef MSER_INPUTSIZE
+#undef MSER_INPUTSIZE
+#endif
+#define MSER_INPUTSIZE $1
+')dnl
+ifdef(`mser_inputsize', mser_inputsize_template(mser_inputsize), `')dnl
+
+dnl SD-VBS svm: size of input image
+define(svm_inputsize_template, `
+#ifdef SVM_INPUTSIZE
+#undef SVM_INPUTSIZE
+#endif
+#define SVM_INPUTSIZE $1
+')dnl
+ifdef(`svm_inputsize', svm_inputsize_template(svm_inputsize), `')dnl
+
+dnl SD-VBS stich: size of input image
+define(stitch_inputsize_template, `
+#ifdef STITCH_INPUTSIZE
+#undef STITCH_INPUTSIZE
+#endif
+#define STITCH_INPUTSIZE $1
+')dnl
+ifdef(`stitch_inputsize', stitch_inputsize_template(stitch_inputsize), `')dnl
+
 dnl Benchmark specific configuration parameters
 dnl
 dnl Mälardalen bsort: size of input array
@@ -430,6 +541,17 @@ ifdef(`bsort_inputsize', bsort_inputsize_template(bsort_inputsize), `')dnl
 
 dnl Benchmark specific configuration parameters
 dnl
+dnl Mälardalen ns: size of arrays
+define(ns_inputsize_template, `
+#ifdef NS_INPUTSIZE
+#undef NS_INPUTSIZE
+#endif
+#define NS_INPUTSIZE $1
+')dnl
+ifdef(`ns_inputsize', ns_inputsize_template(ns_inputsize), `')dnl
+
+dnl Benchmark specific configuration parameters
+dnl
 dnl Mälardalen matmult: size of input matrices
 define(matmult_inputsize_template, `
 #ifdef MATMULT_INPUTSIZE
@@ -439,5 +561,15 @@ define(matmult_inputsize_template, `
 ')dnl
 ifdef(`matmult_inputsize', matmult_inputsize_template(matmult_inputsize), `')dnl
 
+dnl Benchmark specific configuration parameters
+dnl
+dnl Mälardalen matmult: size of input matrices
+define(fir_inputsize_template, `
+#ifdef FIR_INPUTSIZE
+#undef FIR_INPUTSIZE
+#endif
+#define FIR_INPUTSIZE $1
+')dnl
+ifdef(`fir_inputsize', fir_inputsize_template(fir_inputsize), `')dnl
 
 #endif /* ~BENCHMARK_CONFIG_H */

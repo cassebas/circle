@@ -91,9 +91,34 @@
 #define MATMULT_INPUTSIZE 100
 
 /**
+ * Specific configuration for the Mälardalen ns benchmark
+ */
+#define NS_INPUTSIZE 5
+
+/**
+ * Specific configuration for the Mälardalen fir benchmark
+ */
+#define FIR_INPUTSIZE 700
+
+/**
  * Specific configuration for the SD-VBS Disparity benchmark
  */
 #define DISPARITY_INPUTSIZE 96
+
+/**
+ * Specific configuration for the SD-VBS mser benchmark
+ */
+#define MSER_INPUTSIZE 64
+
+/**
+ * Specific configuration for the SD-VBS svm benchmark
+ */
+#define SVM_INPUTSIZE 16
+
+/**
+ * Specific configuration for the SD-VBS stitch benchmark
+ */
+#define STITCH_INPUTSIZE 64
 
 /**
  * If the following macro with name BENCHMARK_CONFIG_M4 was

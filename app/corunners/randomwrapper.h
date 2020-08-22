@@ -4,6 +4,16 @@
 // Subclass derived from CBcmRandomNumberGenerator, with the
 // exact same functionality but also provides a wrapper for
 // usage in C.
+// Additionally, two extra methods are defined for getting a
+// random float:
+//  - float GetFloat(void) => will interpret a u32 random number
+//                            as a float
+//
+//  - float GetSmall Float(void) => will interpret a u32 random number
+//                                  as a float, but will also do some
+//                                  bit manipulation on the u32 number
+//                                  to make the float fall within the
+//                                  [-1.0, 1.0] interval.
 //
 // Circle - A C++ bare metal environment for Raspberry Pi
 // Copyright (C) 2016  R. Stange <rsta2@o2online.de>
@@ -34,8 +44,13 @@
 	class RandomWrapper : public CBcmRandomNumberGenerator
 	{
 	public:
-		RandomWrapper (void);
-		~RandomWrapper (void);
+		/// \return Random float (32-bit)
+		float GetFloat(void);
+		/// \return Random float ([-1.0, 1.0])
+		float GetSmallFloat(void);
+
+	private:
+		float ConvertNumber(u32, bool);
 	};
 #else
 	typedef struct RandomWrapper RandomWrapper;
@@ -47,6 +62,8 @@ extern "C" {
 
 	// This is the wrapper function to make the API available from C
 	extern u32 get_number(RandomWrapper*);
+	extern u32 get_float(RandomWrapper*);
+	extern u32 get_small_float(RandomWrapper*);
 
 #ifdef __cplusplus
 }
