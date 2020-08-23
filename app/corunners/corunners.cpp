@@ -40,6 +40,29 @@ extern "C" {
 	volatile void countdown(u64);
 }
 
+
+/**
+ * Simple function that makes the processor perform a busy
+ * wait by counting down from a specific number. The number
+ * of cycles spent each time is measured and printed.
+ */
+static inline u64 report_cycles_countdown(u64 count)
+{
+    u64 cycles;
+
+	enable_cycle_counter();
+	reset_cycle_counter();
+	//////////////////////
+	// now wait a while //
+	//////////////////////
+	countdown(count);
+	///////////////////
+	disable_cycle_counter();
+	cycles = read_cycle_counter();
+	return cycles;
+}
+
+
 #ifdef DisableInterrupts
 #undef DisableInterrupts
 #endif
@@ -165,6 +188,25 @@ void CoRunners::RunCore0()
 
 	/* Globally enable PMU */
 	enable_pmu();
+
+#ifdef REPORT_CYCLES_COUNTDOWN
+	// Before we do anything, first report the number of cycles spent
+	// while busy waiting using the countdown function. This information
+	// is needed to cause delays for the co-runners.
+	u64 count;
+	float cpc=0.0;
+	for (int i=1; i<=10; i++) {
+		count = i*1000000;
+		cycles = report_cycles_countdown(count);
+		cpc = (float) cycles / count;
+		m_log->Write(FromCoRunners, LogNotice,
+					 "Countdown was %lu. Cycles spent=%lu\n\r",
+					 count, cycles);
+		m_log->Write(FromCoRunners, LogNotice,
+					 "Measured cycles per count was %.9f\n\r",
+					 cpc);
+	}
+#endif
 
 	unsigned iter=0;
 	while (1) {
