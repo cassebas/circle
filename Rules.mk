@@ -23,10 +23,10 @@ CIRCLEHOME ?= ..
 -include $(CIRCLEHOME)/Config.mk
 -include $(CIRCLEHOME)/Config2.mk	# is not overwritten by "configure"
 
-AARCH	 ?= 32
-RASPPI	 ?= 1
+AARCH	 ?= 64
+RASPPI	 ?= 4
 PREFIX	 ?= arm-none-eabi-
-PREFIX64 ?= aarch64-none-elf-
+PREFIX64 ?= aarch64-elf-
 
 # see: doc/stdlib-support.txt
 STDLIB_SUPPORT ?= 1
