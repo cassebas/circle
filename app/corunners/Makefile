@@ -4,6 +4,10 @@
 
 CIRCLEHOME = ../..
 
+AARCH = 64
+RASPPI ?= 4
+PREFIX64 = aarch64-elf-
+
 OBJS	= main.o kernel.o synthetic_bench.o temptask.o armv8_pm.o corunners.o malardalen.o randomwrapper.o ldstexcl.o
 
 LIBS	= $(CIRCLEHOME)/lib/sched/libsched.a \
