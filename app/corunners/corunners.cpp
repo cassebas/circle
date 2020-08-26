@@ -135,7 +135,7 @@ void CoRunners::SyncMaster(CSpinLock& lock)
 	lock.Release();
 }
 
-void CoRunners::SyncSlave(CSpinLock& lock, unsigned corenum)
+void CoRunners::SyncSlave(CSpinLock& lock, unsigned corenum, unsigned offset)
 {
 	if (write_bit_atomic(corenum, true, &m_CoreWaiting))
 		m_log->Write(FromCoRunners, LogWarning,
@@ -150,7 +150,7 @@ void CoRunners::SyncSlave(CSpinLock& lock, unsigned corenum)
 	lock.Release();
 
 	// // Maybe wait a while (create time offset in starting time co-runner)
-	// countdown(1000000000);
+	countdown(offset * DELAY_STEP_COUNTDOWN);
 }
 
 void CoRunners::Run (unsigned corenum)
@@ -179,6 +179,7 @@ void CoRunners::RunCore0()
 	RandomWrapper rand;
     u64 cycles;
 	unsigned corenum = 0;
+    unsigned int offset=0;
 
 	/////////////////////
 	// Benchmark INIT1 //
@@ -208,7 +209,7 @@ void CoRunners::RunCore0()
 	}
 #endif
 
-	unsigned iter=0;
+	unsigned iter=1;
 	while (1) {
 		/////////////////////
 		// Benchmark INIT2 //
@@ -240,7 +241,10 @@ void CoRunners::RunCore0()
 					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE0, NR_OF_CORES, corenum,
-					 cycles, ++iter, 0);
+					 cycles, iter, offset);
+
+		if (++iter % ITERATIONS_PER_STEP == 0)
+			offset += OFFSET_STEP_SIZE;
 
 		// let the temperature task run (only for core 0)
 		CScheduler::Get ()->Yield ();
@@ -252,6 +256,7 @@ void CoRunners::RunCore1()
 	RandomWrapper rand;
     u64 cycles;
 	unsigned corenum = 1;
+    unsigned int offset=0;
 
 	/////////////////////
 	// Benchmark INIT1 //
@@ -262,7 +267,7 @@ void CoRunners::RunCore1()
 	/* Globally enable PMU */
 	enable_pmu();
 
-	unsigned iter=0;
+	unsigned iter=1;
 	while (1) {
 		//////////////////////
 		// Benchmark INIT2 //
@@ -277,7 +282,7 @@ void CoRunners::RunCore1()
 	#endif
 #endif
 
-		SyncSlave(m_SyncLock, corenum);
+		SyncSlave(m_SyncLock, corenum, offset);
 
 		enable_cycle_counter();
 		reset_cycle_counter();
@@ -293,7 +298,10 @@ void CoRunners::RunCore1()
 					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE1, NR_OF_CORES, corenum,
-					 cycles, ++iter, 0);
+					 cycles, iter, offset);
+
+		if (++iter % ITERATIONS_PER_STEP == 0)
+			offset += OFFSET_STEP_SIZE;
 	}
 }
 
@@ -302,6 +310,7 @@ void CoRunners::RunCore2()
 	RandomWrapper rand;
     u64 cycles;
 	unsigned corenum = 2;
+    unsigned int offset=0;
 
 	/////////////////////
 	// Benchmark INIT1 //
@@ -312,7 +321,7 @@ void CoRunners::RunCore2()
 	/* Globally enable PMU */
 	enable_pmu();
 
-	unsigned iter=0;
+	unsigned iter=1;
 	while (1) {
 		/////////////////////
 		// Benchmark INIT2 //
@@ -327,7 +336,7 @@ void CoRunners::RunCore2()
 	#endif
 #endif
 
-		SyncSlave(m_SyncLock, corenum);
+		SyncSlave(m_SyncLock, corenum, offset);
 
 		enable_cycle_counter();
 		reset_cycle_counter();
@@ -343,7 +352,10 @@ void CoRunners::RunCore2()
 					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE2, NR_OF_CORES, corenum,
-					 cycles, ++iter, 0);
+					 cycles, iter, offset);
+
+		if (++iter % ITERATIONS_PER_STEP == 0)
+			offset += OFFSET_STEP_SIZE;
 	}
 }
 
@@ -352,6 +364,7 @@ void CoRunners::RunCore3()
 	RandomWrapper rand;
     u64 cycles;
 	unsigned corenum = 3;
+    unsigned int offset=0;
 
 	/////////////////////
 	// Benchmark INIT1 //
@@ -362,7 +375,7 @@ void CoRunners::RunCore3()
 	/* Globally enable PMU */
 	enable_pmu();
 
-	unsigned iter=0;
+	unsigned iter=1;
 	while (1) {
 		/////////////////////
 		// Benchmark INIT2 //
@@ -377,7 +390,7 @@ void CoRunners::RunCore3()
 	#endif
 #endif
 
-		SyncSlave(m_SyncLock, corenum);
+		SyncSlave(m_SyncLock, corenum, offset);
 
 		enable_cycle_counter();
 		reset_cycle_counter();
@@ -393,6 +406,9 @@ void CoRunners::RunCore3()
 					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE3, NR_OF_CORES, corenum,
-					 cycles, ++iter, 0);
+					 cycles, iter, offset);
+
+		if (++iter % ITERATIONS_PER_STEP == 0)
+			offset += OFFSET_STEP_SIZE;
 	}
 }

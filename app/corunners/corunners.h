@@ -54,7 +54,7 @@ private:
 	void RunCore2 (void);
 	void RunCore3 (void);
 	void SyncMaster(CSpinLock&);
-	void SyncSlave(CSpinLock&, unsigned);
+	void SyncSlave(CSpinLock&, unsigned, unsigned);
 
 private:
 	CScreenDevice *m_pScreen;
