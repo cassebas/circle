@@ -117,12 +117,18 @@ void CoRunners::SyncMaster(CSpinLock& lock)
 	boolean exit = false;
 	while (!exit) {
 		exit = true;
+#if NR_OF_CORES >= 2
 		exit = exit && read_bit_atomic(1, &m_CoreWaiting);
+#endif
+#if NR_OF_CORES >= 3
 		exit = exit && read_bit_atomic(2, &m_CoreWaiting);
+#endif
+#if NR_OF_CORES >= 4
 		exit = exit && read_bit_atomic(3, &m_CoreWaiting);
+#endif
 	}
 
-	for (int i=1; i<4; i++)
+	for (int i=1; i<NR_OF_CORES; i++)
 		if (write_bit_atomic(i, false, &m_CoreWaiting))
 			m_log->Write(FromCoRunners, LogWarning,
 						 "Core0: failure to write to memory");
@@ -253,6 +259,7 @@ void CoRunners::RunCore0()
 
 void CoRunners::RunCore1()
 {
+#if NR_OF_CORES >= 2
 	RandomWrapper rand;
     u64 cycles;
 	unsigned corenum = 1;
@@ -303,10 +310,17 @@ void CoRunners::RunCore1()
 		if (++iter % ITERATIONS_PER_STEP == 0)
 			offset += OFFSET_STEP_SIZE;
 	}
+#else
+	while (1) {
+		// Basically, do nothing, or nothing much..
+		countdown(100 * DELAY_STEP_COUNTDOWN);
+	}
+#endif
 }
 
 void CoRunners::RunCore2()
 {
+#if NR_OF_CORES >= 3
 	RandomWrapper rand;
     u64 cycles;
 	unsigned corenum = 2;
@@ -357,10 +371,17 @@ void CoRunners::RunCore2()
 		if (++iter % ITERATIONS_PER_STEP == 0)
 			offset += OFFSET_STEP_SIZE;
 	}
+#else
+	while (1) {
+		// Basically, do nothing, or nothing much..
+		countdown(100 * DELAY_STEP_COUNTDOWN);
+	}
+#endif
 }
 
 void CoRunners::RunCore3()
 {
+#if NR_OF_CORES >= 4
 	RandomWrapper rand;
     u64 cycles;
 	unsigned corenum = 3;
@@ -411,4 +432,10 @@ void CoRunners::RunCore3()
 		if (++iter % ITERATIONS_PER_STEP == 0)
 			offset += OFFSET_STEP_SIZE;
 	}
+#else
+	while (1) {
+		// Basically, do nothing, or nothing much..
+		countdown(100 * DELAY_STEP_COUNTDOWN);
+	}
+#endif
 }
