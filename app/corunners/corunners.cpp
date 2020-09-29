@@ -184,6 +184,18 @@ void CoRunners::RunCore0()
 {
 	RandomWrapper rand;
     u64 cycles;
+#ifdef PMU_EVENT_CORE0_1
+    unsigned int event1;
+#endif
+#ifdef PMU_EVENT_CORE0_2
+    unsigned int event2;
+#endif
+#ifdef PMU_EVENT_CORE0_3
+    unsigned int event3;
+#endif
+#ifdef PMU_EVENT_CORE0_4
+    unsigned int event4;
+#endif
 	unsigned corenum = 0;
     unsigned int offset=0;
 
@@ -195,6 +207,19 @@ void CoRunners::RunCore0()
 
 	/* Globally enable PMU */
 	enable_pmu();
+
+#ifdef PMU_EVENT_CORE0_1
+	config_event_counter(0, PMU_EVENT_CORE0_1);
+#endif
+#ifdef PMU_EVENT_CORE0_2
+	config_event_counter(1, PMU_EVENT_CORE0_2);
+#endif
+#ifdef PMU_EVENT_CORE0_3
+	config_event_counter(2, PMU_EVENT_CORE0_3);
+#endif
+#ifdef PMU_EVENT_CORE0_4
+	config_event_counter(3, PMU_EVENT_CORE0_4);
+#endif
 
 #ifdef REPORT_CYCLES_COUNTDOWN
 	// Before we do anything, first report the number of cycles spent
@@ -231,9 +256,28 @@ void CoRunners::RunCore0()
 	#endif
 #endif
 
+		enable_cycle_counter();
+#ifdef PMU_EVENT_CORE0_1
+		enable_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE0_2
+		enable_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE0_3
+		enable_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE0_4
+		enable_event_counter(3);
+#endif
+
 		SyncMaster(m_SyncLock);
 
-		enable_cycle_counter();
+		/* Maybe reset the event counters */
+#if defined PMU_EVENT_CORE0_1
+		/* If any of the event counters is active, then at least the first one
+		 * will be active. We can reset the event counters in this case. */
+		reset_event_counters();
+#endif
 		reset_cycle_counter();
 		///////////////////
 		// DO BENCHMARK! //
@@ -241,13 +285,63 @@ void CoRunners::RunCore0()
 		DO_BENCH_CORE0
 		///////////////////
 		disable_cycle_counter();
+#ifdef PMU_EVENT_CORE0_1
+		disable_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE0_2
+		disable_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE0_3
+		disable_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE0_4
+		disable_event_counter(3);
+#endif
+
 		cycles = read_cycle_counter();
+#ifdef PMU_EVENT_CORE0_1
+		event1 = read_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE0_2
+		event2 = read_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE0_3
+		event3 = read_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE0_4
+		event4 = read_event_counter(3);
+#endif
 
 		m_log->Write(FromCoRunners, LogNotice,
 					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE0, NR_OF_CORES, corenum,
 					 cycles, iter, offset);
+
+#ifdef PMU_EVENT_CORE0_1
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE0_1, event1, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE0_2
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE0_2, event2, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE0_3
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE0_3, event3, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE0_4
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE0_4, event4, iter, offset);
+#endif
 
 		if (++iter % ITERATIONS_PER_STEP == 0)
 			offset += OFFSET_STEP_SIZE;
@@ -262,6 +356,18 @@ void CoRunners::RunCore1()
 #if NR_OF_CORES >= 2
 	RandomWrapper rand;
     u64 cycles;
+#ifdef PMU_EVENT_CORE1_1
+    unsigned int event1;
+#endif
+#ifdef PMU_EVENT_CORE1_2
+    unsigned int event2;
+#endif
+#ifdef PMU_EVENT_CORE1_3
+    unsigned int event3;
+#endif
+#ifdef PMU_EVENT_CORE1_4
+    unsigned int event4;
+#endif
 	unsigned corenum = 1;
     unsigned int offset=0;
 
@@ -273,6 +379,19 @@ void CoRunners::RunCore1()
 
 	/* Globally enable PMU */
 	enable_pmu();
+
+#ifdef PMU_EVENT_CORE1_1
+	config_event_counter(0, PMU_EVENT_CORE1_1);
+#endif
+#ifdef PMU_EVENT_CORE1_2
+	config_event_counter(1, PMU_EVENT_CORE1_2);
+#endif
+#ifdef PMU_EVENT_CORE1_3
+	config_event_counter(2, PMU_EVENT_CORE1_3);
+#endif
+#ifdef PMU_EVENT_CORE1_4
+	config_event_counter(3, PMU_EVENT_CORE1_4);
+#endif
 
 	unsigned iter=1;
 	while (1) {
@@ -289,9 +408,28 @@ void CoRunners::RunCore1()
 	#endif
 #endif
 
+		enable_cycle_counter();
+#ifdef PMU_EVENT_CORE1_1
+		enable_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE1_2
+		enable_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE1_3
+		enable_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE1_4
+		enable_event_counter(3);
+#endif
+
 		SyncSlave(m_SyncLock, corenum, offset);
 
-		enable_cycle_counter();
+		/* Maybe reset the event counters */
+#if defined PMU_EVENT_CORE1_1
+		/* If any of the event counters is active, then at least the first one
+		 * will be active. We can reset the event counters in this case. */
+		reset_event_counters();
+#endif
 		reset_cycle_counter();
 		///////////////////
 		// DO BENCHMARK! //
@@ -299,13 +437,63 @@ void CoRunners::RunCore1()
 		DO_BENCH_CORE1
 		///////////////////
 		disable_cycle_counter();
+#ifdef PMU_EVENT_CORE1_1
+		disable_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE1_2
+		disable_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE1_3
+		disable_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE1_4
+		disable_event_counter(3);
+#endif
+
 		cycles = read_cycle_counter();
+#ifdef PMU_EVENT_CORE1_1
+		event1 = read_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE1_2
+		event2 = read_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE1_3
+		event3 = read_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE1_4
+		event4 = read_event_counter(3);
+#endif
 
 		m_log->Write(FromCoRunners, LogNotice,
 					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE1, NR_OF_CORES, corenum,
 					 cycles, iter, offset);
+
+#ifdef PMU_EVENT_CORE1_1
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE1_1, event1, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE1_2
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE1_2, event2, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE1_3
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE1_3, event3, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE1_4
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE1_4, event4, iter, offset);
+#endif
 
 		if (++iter % ITERATIONS_PER_STEP == 0)
 			offset += OFFSET_STEP_SIZE;
@@ -323,6 +511,18 @@ void CoRunners::RunCore2()
 #if NR_OF_CORES >= 3
 	RandomWrapper rand;
     u64 cycles;
+#ifdef PMU_EVENT_CORE2_1
+    unsigned int event1;
+#endif
+#ifdef PMU_EVENT_CORE2_2
+    unsigned int event2;
+#endif
+#ifdef PMU_EVENT_CORE2_3
+    unsigned int event3;
+#endif
+#ifdef PMU_EVENT_CORE2_4
+    unsigned int event4;
+#endif
 	unsigned corenum = 2;
     unsigned int offset=0;
 
@@ -334,6 +534,19 @@ void CoRunners::RunCore2()
 
 	/* Globally enable PMU */
 	enable_pmu();
+
+#ifdef PMU_EVENT_CORE2_1
+	config_event_counter(0, PMU_EVENT_CORE2_1);
+#endif
+#ifdef PMU_EVENT_CORE2_2
+	config_event_counter(1, PMU_EVENT_CORE2_2);
+#endif
+#ifdef PMU_EVENT_CORE2_3
+	config_event_counter(2, PMU_EVENT_CORE2_3);
+#endif
+#ifdef PMU_EVENT_CORE2_4
+	config_event_counter(3, PMU_EVENT_CORE2_4);
+#endif
 
 	unsigned iter=1;
 	while (1) {
@@ -350,9 +563,28 @@ void CoRunners::RunCore2()
 	#endif
 #endif
 
+		enable_cycle_counter();
+#ifdef PMU_EVENT_CORE2_1
+		enable_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE2_2
+		enable_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE2_3
+		enable_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE2_4
+		enable_event_counter(3);
+#endif
+
 		SyncSlave(m_SyncLock, corenum, offset);
 
-		enable_cycle_counter();
+		/* Maybe reset the event counters */
+#if defined PMU_EVENT_CORE2_1
+		/* If any of the event counters is active, then at least the first one
+		 * will be active. We can reset the event counters in this case. */
+		reset_event_counters();
+#endif
 		reset_cycle_counter();
 		///////////////////
 		// DO BENCHMARK! //
@@ -360,13 +592,63 @@ void CoRunners::RunCore2()
 		DO_BENCH_CORE2
 		///////////////////
 		disable_cycle_counter();
+#ifdef PMU_EVENT_CORE2_1
+		disable_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE2_2
+		disable_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE2_3
+		disable_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE2_4
+		disable_event_counter(3);
+#endif
+
 		cycles = read_cycle_counter();
+#ifdef PMU_EVENT_CORE2_1
+		event1 = read_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE2_2
+		event2 = read_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE2_3
+		event3 = read_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE2_4
+		event4 = read_event_counter(3);
+#endif
 
 		m_log->Write(FromCoRunners, LogNotice,
 					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE2, NR_OF_CORES, corenum,
 					 cycles, iter, offset);
+
+#ifdef PMU_EVENT_CORE2_1
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE2_1, event1, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE2_2
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE2_2, event2, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE2_3
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE2_3, event3, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE2_4
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE2_4, event4, iter, offset);
+#endif
 
 		if (++iter % ITERATIONS_PER_STEP == 0)
 			offset += OFFSET_STEP_SIZE;
@@ -384,6 +666,18 @@ void CoRunners::RunCore3()
 #if NR_OF_CORES >= 4
 	RandomWrapper rand;
     u64 cycles;
+#ifdef PMU_EVENT_CORE3_1
+    unsigned int event1;
+#endif
+#ifdef PMU_EVENT_CORE3_2
+    unsigned int event2;
+#endif
+#ifdef PMU_EVENT_CORE3_3
+    unsigned int event3;
+#endif
+#ifdef PMU_EVENT_CORE3_4
+    unsigned int event4;
+#endif
 	unsigned corenum = 3;
     unsigned int offset=0;
 
@@ -395,6 +689,19 @@ void CoRunners::RunCore3()
 
 	/* Globally enable PMU */
 	enable_pmu();
+
+#ifdef PMU_EVENT_CORE3_1
+	config_event_counter(0, PMU_EVENT_CORE3_1);
+#endif
+#ifdef PMU_EVENT_CORE3_2
+	config_event_counter(1, PMU_EVENT_CORE3_2);
+#endif
+#ifdef PMU_EVENT_CORE3_3
+	config_event_counter(2, PMU_EVENT_CORE3_3);
+#endif
+#ifdef PMU_EVENT_CORE3_4
+	config_event_counter(3, PMU_EVENT_CORE3_4);
+#endif
 
 	unsigned iter=1;
 	while (1) {
@@ -411,9 +718,28 @@ void CoRunners::RunCore3()
 	#endif
 #endif
 
+		enable_cycle_counter();
+#ifdef PMU_EVENT_CORE3_1
+		enable_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE3_2
+		enable_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE3_3
+		enable_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE3_4
+		enable_event_counter(3);
+#endif
+
 		SyncSlave(m_SyncLock, corenum, offset);
 
-		enable_cycle_counter();
+		/* Maybe reset the event counters */
+#if defined PMU_EVENT_CORE3_1
+		/* If any of the event counters is active, then at least the first one
+		 * will be active. We can reset the event counters in this case. */
+		reset_event_counters();
+#endif
 		reset_cycle_counter();
 		///////////////////
 		// DO BENCHMARK! //
@@ -421,13 +747,63 @@ void CoRunners::RunCore3()
 		DO_BENCH_CORE3
 		///////////////////
 		disable_cycle_counter();
+#ifdef PMU_EVENT_CORE3_1
+		disable_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE3_2
+		disable_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE3_3
+		disable_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE3_4
+		disable_event_counter(3);
+#endif
+
 		cycles = read_cycle_counter();
+#ifdef PMU_EVENT_CORE3_1
+		event1 = read_event_counter(0);
+#endif
+#ifdef PMU_EVENT_CORE3_2
+		event2 = read_event_counter(1);
+#endif
+#ifdef PMU_EVENT_CORE3_3
+		event3 = read_event_counter(2);
+#endif
+#ifdef PMU_EVENT_CORE3_4
+		event4 = read_event_counter(3);
+#endif
 
 		m_log->Write(FromCoRunners, LogNotice,
 					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE3, NR_OF_CORES, corenum,
 					 cycles, iter, offset);
+
+#ifdef PMU_EVENT_CORE3_1
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE3_1, event1, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE3_2
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE3_2, event2, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE3_3
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE3_3, event3, iter, offset);
+#endif
+#ifdef PMU_EVENT_CORE3_4
+		m_log->Write(FromCoRunners, LogNotice,
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
+					 corenum, PMU_EVENT_CORE3_4, event4, iter, offset);
+#endif
 
 		if (++iter % ITERATIONS_PER_STEP == 0)
 			offset += OFFSET_STEP_SIZE;
