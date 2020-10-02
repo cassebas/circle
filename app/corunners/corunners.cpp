@@ -63,22 +63,6 @@ static inline u64 report_cycles_countdown(u64 count)
 }
 
 
-#ifdef DisableInterrupts
-#undef DisableInterrupts
-#endif
-static inline void DisableInterrupts() {
-	DisableIRQs();
-	DisableFIQs();
-}
-
-#ifdef EnableInterrupts
-#undef EnableInterrupts
-#endif
-static inline void EnableInterrupts() {
-	EnableIRQs();
-	EnableFIQs();
-}
-
 static const char FromCoRunners[] = "CoRunners";
 
 CoRunners::CoRunners (CScreenDevice *pScreen, CMemorySystem *pMemorySystem)
@@ -272,6 +256,7 @@ void CoRunners::RunCore0()
 
 		SyncMaster(m_SyncLock);
 
+		DisableIRQs();
 		/* Maybe reset the event counters */
 #if defined PMU_EVENT_CORE0_1
 		/* If any of the event counters is active, then at least the first one
@@ -297,6 +282,7 @@ void CoRunners::RunCore0()
 #ifdef PMU_EVENT_CORE0_4
 		disable_event_counter(3);
 #endif
+		EnableIRQs();
 
 		cycles = read_cycle_counter();
 #ifdef PMU_EVENT_CORE0_1
@@ -424,6 +410,7 @@ void CoRunners::RunCore1()
 
 		SyncSlave(m_SyncLock, corenum, offset);
 
+		DisableIRQs();
 		/* Maybe reset the event counters */
 #if defined PMU_EVENT_CORE1_1
 		/* If any of the event counters is active, then at least the first one
@@ -449,6 +436,7 @@ void CoRunners::RunCore1()
 #ifdef PMU_EVENT_CORE1_4
 		disable_event_counter(3);
 #endif
+		EnableIRQs();
 
 		cycles = read_cycle_counter();
 #ifdef PMU_EVENT_CORE1_1
@@ -579,6 +567,7 @@ void CoRunners::RunCore2()
 
 		SyncSlave(m_SyncLock, corenum, offset);
 
+		DisableIRQs();
 		/* Maybe reset the event counters */
 #if defined PMU_EVENT_CORE2_1
 		/* If any of the event counters is active, then at least the first one
@@ -604,6 +593,7 @@ void CoRunners::RunCore2()
 #ifdef PMU_EVENT_CORE2_4
 		disable_event_counter(3);
 #endif
+		EnableIRQs();
 
 		cycles = read_cycle_counter();
 #ifdef PMU_EVENT_CORE2_1
@@ -734,6 +724,7 @@ void CoRunners::RunCore3()
 
 		SyncSlave(m_SyncLock, corenum, offset);
 
+		DisableIRQs();
 		/* Maybe reset the event counters */
 #if defined PMU_EVENT_CORE3_1
 		/* If any of the event counters is active, then at least the first one
@@ -759,6 +750,7 @@ void CoRunners::RunCore3()
 #ifdef PMU_EVENT_CORE3_4
 		disable_event_counter(3);
 #endif
+		EnableIRQs();
 
 		cycles = read_cycle_counter();
 #ifdef PMU_EVENT_CORE3_1
