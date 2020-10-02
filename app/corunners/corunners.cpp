@@ -339,6 +339,7 @@ void CoRunners::RunCore0()
 
 void CoRunners::RunCore1()
 {
+	unsigned corenum = 1;
 #if NR_OF_CORES >= 2
 	RandomWrapper rand;
     u64 cycles;
@@ -354,7 +355,6 @@ void CoRunners::RunCore1()
 # ifdef PMU_EVENT_CORE1_4
     unsigned int event4;
 # endif
-	unsigned corenum = 1;
     unsigned int offset=0;
 
 	/////////////////////
@@ -487,6 +487,7 @@ void CoRunners::RunCore1()
 			offset += OFFSET_STEP_SIZE;
 	}
 #else
+	m_log->Write(FromCoRunners, LogNotice, "Core %d is being parked", corenum);
 	while (1) {
 		// This core is parked
 	}
@@ -495,6 +496,7 @@ void CoRunners::RunCore1()
 
 void CoRunners::RunCore2()
 {
+	unsigned corenum = 2;
 #if NR_OF_CORES >= 3
 	RandomWrapper rand;
     u64 cycles;
@@ -510,7 +512,6 @@ void CoRunners::RunCore2()
 # ifdef PMU_EVENT_CORE2_4
     unsigned int event4;
 # endif
-	unsigned corenum = 2;
     unsigned int offset=0;
 
 	/////////////////////
@@ -643,6 +644,7 @@ void CoRunners::RunCore2()
 			offset += OFFSET_STEP_SIZE;
 	}
 #else
+	m_log->Write(FromCoRunners, LogNotice, "Core %d is being parked", corenum);
 	while (1) {
 		// This core is parked
 	}
@@ -651,6 +653,7 @@ void CoRunners::RunCore2()
 
 void CoRunners::RunCore3()
 {
+	unsigned corenum = 3;
 #if NR_OF_CORES >= 4
 	RandomWrapper rand;
     u64 cycles;
@@ -666,7 +669,6 @@ void CoRunners::RunCore3()
 # ifdef PMU_EVENT_CORE3_4
     unsigned int event4;
 # endif
-	unsigned corenum = 3;
     unsigned int offset=0;
 
 	/////////////////////
@@ -799,6 +801,7 @@ void CoRunners::RunCore3()
 			offset += OFFSET_STEP_SIZE;
 	}
 #else
+	m_log->Write(FromCoRunners, LogNotice, "Core %d is being parked", corenum);
 	while (1) {
 		// This core is parked
 	}
