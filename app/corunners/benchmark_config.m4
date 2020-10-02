@@ -198,28 +198,27 @@ dnl BENCHMARK INITIALIZATION 1 STATEMENTS
 dnl *************************************
 dnl
 dnl series nr 1: synthetic benchmarks
-define(bench_init1_1_1, `mydata$1 = new bigstruct_t[INPUTSIZE_CORE$1];')dnl
-define(bench_init1_1_2, `mydata$1 = new bigstruct_t[INPUTSIZE_CORE$1];')dnl
+define(bench_init1_1_1, `mydata$1 = new (HEAP_HIGH) bigstruct_t[INPUTSIZE_CORE$1];')dnl
+define(bench_init1_1_2, `mydata$1 = new (HEAP_HIGH) bigstruct_t[INPUTSIZE_CORE$1];')dnl
 define(bench_init1_1_3, `\
-	mydata$1 = new bigstruct_t[INPUTSIZE_CORE$1]; \
-	myrandidx$1 = new int[INPUTSIZE_CORE$1];
+	mydata$1 = new (HEAP_HIGH) bigstruct_t[INPUTSIZE_CORE$1]; \
+	myrandidx$1 = new (HEAP_HIGH) int[INPUTSIZE_CORE$1];
 ')dnl
 define(bench_init1_1_4, `\
-	mydata$1 = new bigstruct_t[INPUTSIZE_CORE$1]; \
-	myrandidx$1 = new int[INPUTSIZE_CORE$1];
+	mydata$1 = new (HEAP_HIGH) bigstruct_t[INPUTSIZE_CORE$1]; \
+	myrandidx$1 = new (HEAP_HIGH) int[INPUTSIZE_CORE$1];
 ')dnl
 dnl series nr 2: Mälardalen
-define(bench_init1_2_1, `Array$1 = (volatile int*) new int[INPUTSIZE_CORE$1];')dnl
+define(bench_init1_2_1, `Array$1 = (volatile int*) new (HEAP_HIGH) int[INPUTSIZE_CORE$1];')dnl
 define(bench_init1_2_2, `\
 	/* nr of elements in 4-dim array */									\
-	int num_elems = INPUTSIZE_CORE$1 * INPUTSIZE_CORE$1 * INPUTSIZE_CORE$1 * INPUTSIZE_CORE$1;										\
-	keys$1 = (int (*)[INPUTSIZE_CORE$1][INPUTSIZE_CORE$1][INPUTSIZE_CORE$1]) malloc(sizeof(int) * num_elems);		\
-	answer$1 = (int (*)[INPUTSIZE_CORE$1][INPUTSIZE_CORE$1][INPUTSIZE_CORE$1]) malloc(sizeof(int) * num_elems);		\
+	keys$1 = new (HEAP_HIGH) [INPUTSIZE_CORE$1][INPUTSIZE_CORE$1][INPUTSIZE_CORE$1];	\
+	answer$1 = new (HEAP_HIGH) [INPUTSIZE_CORE$1][INPUTSIZE_CORE$1][INPUTSIZE_CORE$1];	\
 	ns_Initialize(keys$1, answer$1);')dnl
 define(bench_init1_2_3, `')dnl
 define(bench_init1_2_4, `\
-	in_data$1 = (long*) malloc(sizeof(long) * INPUTSIZE_CORE$1);			\
-	output$1 = (long*) malloc(sizeof(long) * INPUTSIZE_CORE$1);
+	in_data$1 = (long*) new (HEAP_HIGH) long[INPUTSIZE_CORE$1];			\
+	output$1 = (long*) new (HEAP_HIGH) long[INPUTSIZE_CORE$1];
 	')dnl
 dnl series nr 3: SD-VBS
 define(bench_init1_3_1, `\
