@@ -488,8 +488,7 @@ void CoRunners::RunCore1()
 	}
 #else
 	while (1) {
-		// Basically, do nothing, or nothing much..
-		countdown(100 * DELAY_STEP_COUNTDOWN);
+		// This core is parked
 	}
 #endif
 }
@@ -645,8 +644,7 @@ void CoRunners::RunCore2()
 	}
 #else
 	while (1) {
-		// Basically, do nothing, or nothing much..
-		countdown(100 * DELAY_STEP_COUNTDOWN);
+		// This core is parked
 	}
 #endif
 }
@@ -802,8 +800,7 @@ void CoRunners::RunCore3()
 	}
 #else
 	while (1) {
-		// Basically, do nothing, or nothing much..
-		countdown(100 * DELAY_STEP_COUNTDOWN);
+		// This core is parked
 	}
 #endif
 }
