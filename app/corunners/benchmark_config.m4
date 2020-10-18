@@ -406,6 +406,8 @@ define(call_pmu_event, pmu_event$1)dnl
 dnl
 divert(0)dnl
 dnl
+
+
 macro_loop(0, 3, `bench_string_core_undef')dnl
 macro_loop(0, 3, `bench_decl_core_undef')dnl
 macro_loop(0, 3, `bench_init1_core_undef')dnl
@@ -414,6 +416,46 @@ macro_loop(0, 3, `do_bench_core_undef')dnl
 macro_loop(0, 3, `bench_cleanup_core_undef')dnl
 macro_tripleloop(0, 3, 1, 3, 1, nr_of_benchmarks, `bench_config_core_undef')dnl
 macro_doubleloop(0, 3, 1, nr_of_pmus, `pmu_event_core_undef')dnl
+
+
+dnl Define all benchmark inputsizes with a default value, to make
+dnl sure that all inputsizes have been defined.
+dnl The specific needed inputsizes that are given as parameters to
+dnl this script will be redefined below.
+define(bench_inputsize_name_init_def, `
+#ifndef call_bench_inputsize_name($1, $2)
+#define call_bench_inputsize_name($1, $2) `100'
+#endif
+')dnl
+macro_doubleloop(1, 3, 1, nr_of_benchmarks, `bench_inputsize_name_init_def')dnl
+
+
+dnl Benchmark specific configuration parameters
+dnl
+dnl Size of input for all cores, if inputsize was defined as a parameter
+dnl to this script this size will be used. Otherwise the default size of 50
+dnl will be used.
+define(inputsize_template, `
+#ifdef INPUTSIZE_CORE$1
+#undef INPUTSIZE_CORE$1
+#endif
+#define INPUTSIZE_CORE$1 $2
+')dnl
+define(call_inputsize_template, `
+ifdef(`inputsize_core$1', inputsize_template($1, `inputsize_core$1'), `inputsize_template($1, 50)')
+')dnl
+macro_loop(0, 3, `call_inputsize_template')dnl
+
+
+dnl For each benchmark that runs on a specifi core, define the corresponding
+dnl macro for the inputsize. The inputsize is specified per core, which is
+dnl tied to the specific benchmark with the following macro loop.
+define(inputsize_name_core_def, `
+#ifdef call_bench_inputsize_name(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1))
+#undef call_bench_inputsize_name(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1))
+#endif
+#define call_bench_inputsize_name(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1)) INPUTSIZE_CORE$1')dnl
+macro_loop(0, eval(len(config_benchmarks) - 1), `inputsize_name_core_def')dnl
 
 
 /* Configuration of benchmarks */
@@ -479,13 +521,13 @@ ifdef(`exp_label', `', `define(exp_label, `default')')
 #endif
 
 dnl maybe define the tick rate in Hz
-define(tick_rate_hz_template, `
-#ifdef TICK_RATE_HZ
-#undef TICK_RATE_HZ
+define(delay_step_countdown_template, `
+#ifdef DELAY_STEP_COUNTDOWN
+#undef DELAY_STEP_COUNTDOWN
 #endif
-#define TICK_RATE_HZ $1
+#define DELAY_STEP_COUNTDOWN $1
 ')dnl
-ifdef(`tick_rate_hz', `tick_rate_hz_template(tick_rate_hz)', `')
+ifdef(`delay_step_countdown', `delay_step_countdown_template(delay_step_countdown)', `')
 
 dnl maybe enable the MMU
 define(mmu_enable_def, `
@@ -510,43 +552,6 @@ define(debug_enable_def, `
 #endif
 ')dnl
 ifdef(`debug_enable', debug_enable_def, `')dnl
-
-dnl Benchmark specific configuration parameters
-dnl
-dnl Size of input for all cores, if inputsize was defined as a parameter
-dnl to this script this size will be used. Otherwise the default size of 50
-dnl will be used.
-define(inputsize_template, `
-#ifdef INPUTSIZE_CORE$1
-#undef INPUTSIZE_CORE$1
-#endif
-#define INPUTSIZE_CORE$1 $2
-')dnl
-define(call_inputsize_template, `
-ifdef(`inputsize_core$1', inputsize_template($1, `inputsize_core$1'), `inputsize_template($1, 50)')
-')dnl
-macro_loop(0, 3, `call_inputsize_template')dnl
-
-dnl Define all benchmark inputsizes with a default value, to make
-dnl sure that all inputsizes have been defined.
-dnl The specific needed inputsizes that are given as parameters to
-dnl this script will be redefined below.
-define(bench_inputsize_name_init_def, `
-#ifndef call_bench_inputsize_name($1, $2)
-#define call_bench_inputsize_name($1, $2) `100'
-#endif
-')dnl
-macro_doubleloop(1, 3, 1, nr_of_benchmarks, `bench_inputsize_name_init_def')dnl
-
-dnl For each benchmark that runs on a specifi core, define the corresponding
-dnl macro for the inputsize. The inputsize is specified per core, which is
-dnl tied to the specific benchmark with the following macro loop.
-define(inputsize_name_core_def, `
-#ifdef call_bench_inputsize_name(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1))
-#undef call_bench_inputsize_name(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1))
-#endif
-#define call_bench_inputsize_name(substr(config_series, $1, 1), substr(config_benchmarks, $1, 1)) INPUTSIZE_CORE$1')dnl
-macro_loop(0, eval(len(config_benchmarks) - 1), `inputsize_name_core_def')dnl
 
 dnl Optionally report the number of cycles spent while busy
 dnl waiting a specific number of countdown counts. The countdown
