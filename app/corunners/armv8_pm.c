@@ -19,7 +19,7 @@ extern inline u64 read_cei_reg();
 extern inline void config_event_counter(unsigned int counter, unsigned int event);
 extern inline void enable_event_counter(unsigned int counter);
 extern inline void disable_event_counter(unsigned int counter);
-extern inline unsigned int read_event_counter(unsigned int counter);
+extern inline u64 read_event_counter(unsigned int counter);
 /**
  * Reset all event counters to zero (not including PMCCNTR_EL0).
  */

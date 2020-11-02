@@ -169,16 +169,16 @@ void CoRunners::RunCore0()
 	RandomWrapper rand;
     u64 cycles;
 #ifdef PMU_EVENT_CORE0_1
-    unsigned int event1;
+    u64 event1;
 #endif
 #ifdef PMU_EVENT_CORE0_2
-    unsigned int event2;
+    u64 event2;
 #endif
 #ifdef PMU_EVENT_CORE0_3
-    unsigned int event3;
+    u64 event3;
 #endif
 #ifdef PMU_EVENT_CORE0_4
-    unsigned int event4;
+    u64 event4;
 #endif
 	unsigned corenum = 0;
     unsigned int offset=0;
@@ -299,32 +299,32 @@ void CoRunners::RunCore0()
 #endif
 
 		m_log->Write(FromCoRunners, LogNotice,
-					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
+					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %llu iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE0, NR_OF_CORES, corenum,
 					 cycles, iter, offset);
 
 #ifdef PMU_EVENT_CORE0_1
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE0_1, event1, iter, offset);
 #endif
 #ifdef PMU_EVENT_CORE0_2
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE0_2, event2, iter, offset);
 #endif
 #ifdef PMU_EVENT_CORE0_3
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE0_3, event3, iter, offset);
 #endif
 #ifdef PMU_EVENT_CORE0_4
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE0_4, event4, iter, offset);
 #endif
@@ -344,16 +344,16 @@ void CoRunners::RunCore1()
 	RandomWrapper rand;
     u64 cycles;
 # ifdef PMU_EVENT_CORE1_1
-    unsigned int event1;
+    u64 event1;
 # endif
 # ifdef PMU_EVENT_CORE1_2
-    unsigned int event2;
+    u64 event2;
 # endif
 # ifdef PMU_EVENT_CORE1_3
-    unsigned int event3;
+    u64 event3;
 # endif
 # ifdef PMU_EVENT_CORE1_4
-    unsigned int event4;
+    u64 event4;
 # endif
     unsigned int offset=0;
 
@@ -453,32 +453,32 @@ void CoRunners::RunCore1()
 # endif
 
 		m_log->Write(FromCoRunners, LogNotice,
-					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
+					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %llu iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE1, NR_OF_CORES, corenum,
 					 cycles, iter, offset);
 
 # ifdef PMU_EVENT_CORE1_1
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE1_1, event1, iter, offset);
 # endif
 # ifdef PMU_EVENT_CORE1_2
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE1_2, event2, iter, offset);
 # endif
 # ifdef PMU_EVENT_CORE1_3
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE1_3, event3, iter, offset);
 # endif
 # ifdef PMU_EVENT_CORE1_4
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE1_4, event4, iter, offset);
 # endif
@@ -501,16 +501,16 @@ void CoRunners::RunCore2()
 	RandomWrapper rand;
     u64 cycles;
 # ifdef PMU_EVENT_CORE2_1
-    unsigned int event1;
+    u64 event1;
 # endif
 # ifdef PMU_EVENT_CORE2_2
-    unsigned int event2;
+    u64 event2;
 # endif
 # ifdef PMU_EVENT_CORE2_3
-    unsigned int event3;
+    u64 event3;
 # endif
 # ifdef PMU_EVENT_CORE2_4
-    unsigned int event4;
+    u64 event4;
 # endif
     unsigned int offset=0;
 
@@ -610,32 +610,32 @@ void CoRunners::RunCore2()
 # endif
 
 		m_log->Write(FromCoRunners, LogNotice,
-					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
+					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %llu iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE2, NR_OF_CORES, corenum,
 					 cycles, iter, offset);
 
 # ifdef PMU_EVENT_CORE2_1
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE2_1, event1, iter, offset);
 # endif
 # ifdef PMU_EVENT_CORE2_2
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE2_2, event2, iter, offset);
 # endif
 # ifdef PMU_EVENT_CORE2_3
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE2_3, event3, iter, offset);
 # endif
 # ifdef PMU_EVENT_CORE2_4
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE2_4, event4, iter, offset);
 # endif
@@ -658,16 +658,16 @@ void CoRunners::RunCore3()
 	RandomWrapper rand;
     u64 cycles;
 # ifdef PMU_EVENT_CORE3_1
-    unsigned int event1;
+    u64 event1;
 # endif
 # ifdef PMU_EVENT_CORE3_2
-    unsigned int event2;
+    u64 event2;
 # endif
 # ifdef PMU_EVENT_CORE3_3
-    unsigned int event3;
+    u64 event3;
 # endif
 # ifdef PMU_EVENT_CORE3_4
-    unsigned int event4;
+    u64 event4;
 # endif
     unsigned int offset=0;
 
@@ -767,32 +767,32 @@ void CoRunners::RunCore3()
 # endif
 
 		m_log->Write(FromCoRunners, LogNotice,
-					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %12u iteration: %u offset: %d",
+					 "CYCLECOUNT label: %s %s %s %s cores: %d core: %d cycle_count: %llu iteration: %u offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING,
 					 BENCH_STRING_CORE3, NR_OF_CORES, corenum,
 					 cycles, iter, offset);
 
 # ifdef PMU_EVENT_CORE3_1
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 1 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE3_1, event1, iter, offset);
 # endif
 # ifdef PMU_EVENT_CORE3_2
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 2 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE3_2, event2, iter, offset);
 # endif
 # ifdef PMU_EVENT_CORE3_3
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 3 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE3_3, event3, iter, offset);
 # endif
 # ifdef PMU_EVENT_CORE3_4
 		m_log->Write(FromCoRunners, LogNotice,
-					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %d iteration: %d offset: %d",
+					 "EVENTCOUNT label: %s %s %s cores: %d core: %d pmu: 4 event_number: %#02x event_count: %llu iteration: %d offset: %d",
 					 EXP_LABEL, CONFIG_SERIES_STRING, CONFIG_BENCH_STRING, NR_OF_CORES,
 					 corenum, PMU_EVENT_CORE3_4, event4, iter, offset);
 # endif
